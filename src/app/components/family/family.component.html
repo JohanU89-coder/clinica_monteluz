@@ -1,0 +1,32 @@
+<div class="page-container">
+  <header class="page-header">
+    <h1>Mi Grupo Familiar</h1>
+    <p>Administra los perfiles de tus dependientes para agendar citas en su nombre.</p>
+  </header>
+
+  <div class="family-layout">
+    <section class="family-list-section">
+      <h3>Miembros Registrados</h3>
+      <div class="members-list">
+        <div class="member-card primary" *ngIf="authService.userProfile() as profile">
+          <p>{{ profile.full_name }}</p>
+          <span>(Tú)</span>
+        </div>
+        <div *ngFor="let dependent of authService.dependents()" class="member-card">
+          <p>{{ dependent.full_name }}</p>
+        </div>
+        <p *ngIf="authService.dependents().length === 0" class="empty-list">
+          Aún no has añadido ningún familiar.
+        </p>
+      </div>
+    </section>
+
+    <section class="add-family-section">
+      <h3>Añadir Nuevo Familiar</h3>
+      <form (ngSubmit)="addDependent()" class="add-form">
+        <input type="text" [(ngModel)]="newDependentName" name="newDependentName" placeholder="Nombre completo del familiar..." required>
+        <button type="submit" [disabled]="!newDependentName.trim()">Añadir</button>
+      </form>
+    </section>
+  </div>
+</div>

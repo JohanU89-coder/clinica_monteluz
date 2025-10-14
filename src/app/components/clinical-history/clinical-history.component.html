@@ -1,0 +1,68 @@
+<div class="page-container">
+  <header class="page-header">
+    <h1>Historial Clínico de Pacientes</h1>
+    <p>Selecciona un paciente para ver su historial de citas completo.</p>
+  </header>
+
+  <div class="history-layout">
+    <aside class="patient-list-container">
+      <h4>Mis Pacientes</h4>
+      <div class="patient-list">
+        <button *ngFor="let patient of clinicalHistoryService.uniquePatients()"
+                [class.selected]="clinicalHistoryService.selectedPatient()?.id === patient.id"
+                (click)="selectPatient(patient)">
+          {{ patient.full_name }}
+        </button>
+        <p *ngIf="clinicalHistoryService.uniquePatients().length === 0" class="empty-list">
+          No tienes pacientes en tu historial.
+        </p>
+      </div>
+    </aside>
+
+    <main class="history-details-container">
+      <ng-container *ngIf="clinicalHistoryService.selectedPatient() as patient; else noPatientSelected">
+        <h4>Historial de: <span class="patient-name">{{ patient.full_name }}</span></h4>
+        <div class="appointment-history-list">
+          <div *ngFor="let apt of clinicalHistoryService.patientHistory()" class="history-item-wrapper">
+            <div class="history-item">
+              <div class="item-header">
+                <span class="date">{{ apt.appointment_time | date:'fullDate':'':'es-PE' }}</span>
+                <span class="status-badge" [ngClass]="apt.status">{{ apt.status | titlecase }}</span>
+              </div>
+              <div class="item-body">
+                <p *ngIf="apt.diagnosis"><strong>Diagnóstico:</strong> {{ apt.diagnosis }}</p>
+                <p *ngIf="!apt.diagnosis" class="no-data">Sin diagnóstico registrado.</p>
+                
+                <div *ngIf="apt.rating" class="rating-info">
+                  <strong>Calificación del Paciente:</strong>
+                  <span class="stars">{{ '★'.repeat(apt.rating!) }}{{ '☆'.repeat(5 - apt.rating!) }}</span>
+                  <p *ngIf="apt.feedback"><em>"{{ apt.feedback }}"</em></p>
+                </div>
+              </div>
+              <div class="item-footer" *ngIf="apt.status === 'completed'">
+                <button class="action-btn" *ngIf="!apt.diagnosis" (click)="openEditor(apt.id)">Añadir Diagnóstico</button>
+                <button class="action-btn" *ngIf="!apt.prescriptions?.length" (click)="prescriptionService.startCreation(apt)">Crear Receta</button>
+                <button class="action-btn" *ngIf="apt.prescriptions?.length" (click)="prescriptionService.view(apt.prescriptions![0]!.id)">Ver Receta</button>
+              </div>
+            </div>
+            
+            <div class="expandable-form" *ngIf="editingAppointmentId() === apt.id">
+              <div class="action-form">
+                <textarea #diagnosis placeholder="Escribe el diagnóstico..."></textarea>
+                <div class="form-actions">
+                  <button class="secondary-btn" (click)="closeEditor()">Cancelar</button>
+                  <button class="primary-btn" (click)="submitDiagnosis(apt.id, diagnosis)">Guardar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+      <ng-template #noPatientSelected>
+        <div class="empty-state">
+          <p>Selecciona un paciente de la lista para ver sus detalles.</p>
+        </div>
+      </ng-template>
+    </main>
+  </div>
+</div>

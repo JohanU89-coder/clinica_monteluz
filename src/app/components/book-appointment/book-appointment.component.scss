@@ -1,0 +1,138 @@
+// src/app/components/book-appointment/book-appointment.component.scss
+
+.page-header {
+  margin-bottom: 2rem;
+  h1 { font-size: 2rem; color: var(--dark-blue); }
+  p { color: var(--text-muted); }
+}
+
+.alert {
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  border-radius: 8px;
+  &.success { background-color: #d1e7dd; color: #0f5132; }
+  &.error { background-color: #f8d7da; color: #842029; }
+}
+
+.booking-flow .step {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+
+  h3 { margin-bottom: 1rem; }
+  select {
+    width: 100%;
+    max-width: 400px;
+    padding: 0.8rem;
+    font-size: 1rem;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+  }
+}
+
+.doctor-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  .doctor-card {
+    border: 1px solid var(--border-color);
+    padding: 1rem;
+    border-radius: 8px;
+    text-align: left;
+    background: var(--white);
+    transition: all 0.2s;
+    &.selected {
+      border-color: var(--primary-color);
+      background-color: #e7f1ff;
+      box-shadow: 0 0 0 2px var(--primary-color);
+    }
+    h4 { margin-bottom: 0.25rem; }
+    p { font-size: 0.9rem; color: #777; }
+  }
+}
+
+.slots-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  .slot-button {
+    background-color: #e9ecef;
+    color: var(--dark-blue);
+    border: 1px solid #dee2e6;
+    &.selected {
+      background-color: var(--primary-color);
+      color: var(--white);
+      border-color: var(--primary-color);
+    }
+  }
+}
+
+.confirmation-section {
+  background: #e7f1ff;
+  border: 1px solid #b6d4fe;
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-top: 1.5rem;
+  h3 { margin-bottom: 1rem; }
+  .confirmation-details p { margin-bottom: 0.5rem; }
+  .confirm-btn {
+    margin-top: 1rem;
+    background-color: #198754;
+    color: white;
+  }
+}
+
+.empty-state {
+    color: var(--text-muted);
+}
+
+.day-selector {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+  overflow-x: auto;
+
+  .day-button {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: var(--white);
+    transition: all 0.2s;
+
+    .day-name {
+      font-size: 0.8rem;
+      text-transform: capitalize;
+      color: var(--text-muted);
+    }
+    .day-number {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--dark-blue);
+    }
+
+    &.selected {
+      border-color: var(--primary-color);
+      background-color: var(--primary-color);
+      .day-name, .day-number {
+        color: var(--white);
+      }
+    }
+  }
+}
+
+.time-header {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--dark-blue);
+}

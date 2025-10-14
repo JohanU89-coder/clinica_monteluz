@@ -1,0 +1,45 @@
+<div class="dashboard-layout">
+  <aside class="sidebar">
+    <div class="header">
+      <h3>Clínica Monteluz</h3>
+    </div>
+    <div class="profile-summary">
+      <h4>{{ authService.userProfile()?.full_name }}</h4>
+      <p class="role">{{ authService.userProfile()?.role === 'doctor' ? 'Doctor' : 'Paciente' }}</p>
+    </div>
+    <nav class="nav-menu">
+      <ng-container *ngIf="authService.userProfile()?.role === 'patient'">
+        <button (click)="activeTab.set('book')" [class.active]="activeTab() === 'book'">Agendar Cita</button>
+        <button (click)="activeTab.set('upcoming')" [class.active]="activeTab() === 'upcoming'">Próximas Citas</button>
+        <button (click)="activeTab.set('past')" [class.active]="activeTab() === 'past'">Historial</button>
+        <button (click)="activeTab.set('family')" [class.active]="activeTab() === 'family'">Mi Familia</button>
+      </ng-container>
+      
+      <ng-container *ngIf="authService.userProfile()?.role === 'doctor'">
+        <button (click)="activeTab.set('office')" [class.active]="activeTab() === 'office'">Mi Consultorio</button>
+        <button (click)="activeTab.set('upcoming')" [class.active]="activeTab() === 'upcoming'">Citas Agendadas</button>
+        <button (click)="activeTab.set('past')" [class.active]="activeTab() === 'past'">Historial Clínico</button>
+      </ng-container>
+      
+      <hr>
+      <button (click)="activeTab.set('profile')" [class.active]="activeTab() === 'profile'">Mi Perfil</button>
+    </nav>
+    <button class="logout-btn" (click)="handleLogout()">Cerrar Sesión</button>
+  </aside>
+
+  <main class="main-content">
+    <div [ngSwitch]="activeTab()">
+      <app-book-appointment *ngSwitchCase="'book'"></app-book-appointment>
+      <app-appointment-list *ngSwitchCase="'upcoming'" [listType]="'upcoming'"></app-appointment-list>
+      <app-doctor-office *ngSwitchCase="'office'"></app-doctor-office>
+      <app-profile *ngSwitchCase="'profile'"></app-profile>
+      <app-family *ngSwitchCase="'family'"></app-family>
+
+      <ng-container *ngSwitchCase="'past'">
+        <app-appointment-list *ngIf="authService.userProfile()?.role === 'patient'" [listType]="'past'"></app-appointment-list>
+        <app-clinical-history *ngIf="authService.userProfile()?.role === 'doctor'"></app-clinical-history>
+      </ng-container>
+      
+    </div>
+  </main>
+</div>

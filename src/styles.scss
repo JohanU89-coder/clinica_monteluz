@@ -1,1 +1,47 @@
 /* You can add global styles to this file, and also import other style files */
+/* src/styles.scss */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --primary-color: #0d6efd;
+  --primary-hover: #0b5ed7;
+  --dark-blue: #0d1b2a;
+  --mid-blue: #415a77;
+  --light-blue: #778da9;
+  --off-white: #e0e1dd;
+  --light-bg: #f0f4f8;
+  --border-color: #dee2e6;
+  --text-color: #212529;
+  --text-muted: #6c757d;
+  --white: #ffffff;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--light-bg);
+  color: var(--text-color);
+}
+
+button {
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  transition: background-color 0.25s, border-color 0.25s;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--dark-blue);
+}

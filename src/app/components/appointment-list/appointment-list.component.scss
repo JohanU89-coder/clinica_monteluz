@@ -1,0 +1,241 @@
+.page-header {
+  margin-bottom: 2rem;
+  h1 { font-size: 2rem; color: var(--dark-blue); }
+  p { color: var(--text-muted); }
+}
+
+.appointment-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+.appointment-card-wrapper {
+  background-color: var(--white);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  transition: box-shadow 0.3s ease;
+  
+  &:has(.expandable-form) {
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+  }
+
+  .appointment-card {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    border-left: 5px solid;
+
+    &.scheduled { border-left-color: var(--primary-color); }
+    &.completed { border-left-color: #198754; }
+    &.canceled { border-left-color: #6c757d; }
+
+    .date-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-color: #f0f4f8;
+      border-radius: 8px;
+      width: 65px;
+      height: 65px;
+      margin-right: 1.5rem;
+      flex-shrink: 0;
+      .month { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; }
+      .day { font-size: 1.8rem; font-weight: 700; color: var(--dark-blue); line-height: 1; }
+    }
+
+    .info-block {
+      flex-grow: 1;
+      display: flex;
+      gap: 2rem;
+      align-items: center;
+      
+      .person-details, .time-details {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+      
+      .icon {
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #e7f1ff;
+        border-radius: 50%;
+        color: var(--primary-color);
+        flex-shrink: 0;
+      }
+
+      .person-name { font-size: 1.1rem; font-weight: 600; color: var(--dark-blue); }
+      .person-label { font-size: 0.9rem; color: var(--text-muted); text-transform: capitalize; }
+      .time { font-size: 1.1rem; font-weight: 600; color: var(--dark-blue); }
+
+      .rating-details {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        .star-icon {
+          background-color: #fffbeb;
+          color: #f59e0b;
+        }
+        .rating-value {
+          font-size: 1rem;
+          font-weight: 600;
+          color: var(--dark-blue);
+        }
+      }
+    }
+    
+    .action-block {
+      margin-left: auto;
+      padding-left: 1rem;
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      
+      .action-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+        min-width: 100px;
+        border-radius: 8px;
+        white-space: nowrap;
+        border: 1px solid var(--border-color);
+        background-color: var(--white);
+        color: var(--dark-blue);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        &:hover { background-color: #f0f4f8; border-color: #c9d2d9; }
+      }
+
+      .status-badge {
+        font-size: 0.8rem;
+        font-weight: 600;
+        padding: 0.25rem 0.75rem;
+        border-radius: 999px;
+        text-transform: capitalize;
+        white-space: nowrap;
+        &.completed { background-color: #d1e7dd; color: #0f5132; }
+        &.canceled { background-color: #e2e3e5; color: #41464b; }
+      }
+
+      .upcoming-actions { display: flex; gap: 0.5rem; }
+      .complete-btn { 
+        background-color: #198754; color: white; border-color: #198754;
+        &:hover { background-color: #157347; border-color: #157347; }
+      }
+      .cancel-btn { 
+        background-color: #dc3545; color: white; border-color: #dc3545;
+        &:hover { background-color: #bb2d3b; border-color: #bb2d3b; }
+      }
+    }
+  }
+
+  .expandable-form {
+    padding: 0 1.5rem 1.5rem 1.5rem;
+    border-top: 1px solid #eef2f5;
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  background: var(--white);
+  border-radius: 12px;
+  p { font-size: 1.1rem; color: var(--text-muted); }
+}
+
+.diagnosis-display, .rating-display {
+  padding-top: 1rem;
+  strong {
+    font-weight: 600;
+    color: var(--dark-blue);
+    font-size: 0.9rem;
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+  p {
+    margin-top: 0.5rem;
+    padding: 0.75rem;
+    background-color: #eef2f5;
+    border-radius: 8px;
+    white-space: pre-wrap;
+    font-size: 0.9rem;
+    color: #333;
+    strong { display: inline; margin-bottom: 0; font-size: 0.9rem; }
+  }
+  .stars {
+    font-size: 1.5rem;
+    span.filled { color: #ffc107; }
+  }
+}
+
+.action-form {
+  padding-top: 1rem;
+  width: 100%;
+
+  textarea {
+    width: 100%; min-height: 80px; padding: 0.5rem;
+    border-radius: 8px; border: 1px solid var(--border-color);
+    margin-bottom: 0.5rem;
+  }
+  
+  .rating-input {
+    margin-bottom: 0.5rem;
+    p { font-size: 0.9rem; font-weight: 500; margin-bottom: 0.25rem; }
+    .stars-input {
+      display: flex;
+      button {
+        background: none; border: none; font-size: 2rem; color: #ccc;
+        padding: 0 0.1rem; transition: color 0.2s; cursor: pointer;
+        &:hover, &.selected { color: #ffc107; }
+      }
+    }
+  }
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  border-top: 1px solid #eef2f5;
+  padding-top: 1rem;
+
+  .primary-btn { 
+    background-color: var(--primary-color); color: white; border-color: var(--primary-color);
+    &:hover { background-color: #0a58ca; border-color: #0a58ca; }
+  }
+  .secondary-btn { 
+    background-color: var(--text-muted); color: white; border-color: var(--text-muted);
+    &:hover { background-color: #5c636a; border-color: #5c636a; }
+  }
+
+  // ... (todos los estilos existentes) ...
+
+// --- AÑADE ESTOS NUEVOS ESTILOS AL FINAL ---
+
+.expandable-form {
+  // Separa las secciones de diagnóstico y calificación si ambas existen
+  .diagnosis-display + .rating-display {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #eef2f5;
+  }
+}
+
+.rating-display {
+  .stars {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .rating-value-text {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-muted);
+  }
+}
+}

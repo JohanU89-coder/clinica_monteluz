@@ -1,0 +1,83 @@
+<div class="modal-overlay" *ngIf="prescriptionService.prescriptionState() || prescriptionService.viewedPrescription()" (click)="close()">
+  
+  <div class="modal-content create-mode" *ngIf="prescriptionService.prescriptionState() as state" (click)="$event.stopPropagation()">
+    <header class="modal-header">
+      <div class="header-text">
+        <div class="rx-icon">℞</div>
+        <h2>Crear Nueva Receta</h2>
+      </div>
+      <button class="close-btn" (click)="close()">×</button>
+    </header>
+    <main class="modal-body">
+      <div class="patient-info">
+        <strong>Paciente:</strong> {{ state.appointment.patient?.full_name }}
+      </div>
+      <form #form="ngForm" class="prescription-form">
+        <div *ngFor="let item of state.items; let i = index" class="form-item">
+          <div class="form-grid">
+            <input class="medication-input" type="text" placeholder="Medicamento" [(ngModel)]="item.medication" [name]="'medication' + i" required>
+            <input type="text" placeholder="Dosis (ej: 500mg)" [(ngModel)]="item.dosage" [name]="'dosage' + i">
+            <input type="text" placeholder="Frecuencia (ej: cada 8h)" [(ngModel)]="item.frequency" [name]="'frequency' + i">
+            <input type="text" placeholder="Duración (ej: por 7 días)" [(ngModel)]="item.duration" [name]="'duration' + i">
+          </div>
+          <textarea placeholder="Notas adicionales..." [(ngModel)]="item.notes" [name]="'notes' + i"></textarea>
+          <button type="button" class="remove-item-btn" *ngIf="state.items.length > 1" (click)="removeItem(i)">Eliminar Fármaco</button>
+        </div>
+      </form>
+      <button class="add-item-btn" (click)="addItem()">+ Añadir Otro Fármaco</button>
+    </main>
+    <footer class="modal-footer">
+      <button class="secondary-btn" (click)="close()">Cancelar</button>
+      <button class="primary-btn" [disabled]="form.invalid" (click)="save()">Guardar Receta</button>
+    </footer>
+  </div>
+
+  <div class="modal-content view-mode" *ngIf="prescriptionService.viewedPrescription() as prescription" (click)="$event.stopPropagation()">
+    <header class="modal-header">
+      <div class="header-text">
+        <div class="rx-icon">℞</div>
+        <h2>Receta Médica</h2>
+      </div>
+      <button class="close-btn" (click)="close()">×</button>
+    </header>
+    <main class="modal-body">
+      <div class="prescription-info">
+        <div>
+          <span class="label">Paciente</span>
+          <p>{{ prescription.patient?.full_name }}</p>
+        </div>
+        <div>
+          <span class="label">Fecha</span>
+          <p>{{ prescription.created_at | date:'fullDate':'':'es-PE' }}</p>
+        </div>
+        <div>
+          <span class="label">Médico Tratante</span>
+          <p>{{ prescription.doctor?.full_name }}</p>
+        </div>
+      </div>
+      <div class="items-list">
+        <div *ngFor="let item of prescription.items" class="item-card">
+          <h3 class="medication-name">{{ item.medication }}</h3>
+          <div class="item-details">
+            <div class="detail">
+              <span class="label">Dosis:</span>
+              <span>{{ item.dosage || 'N/A' }}</span>
+            </div>
+            <div class="detail">
+              <span class="label">Frecuencia:</span>
+              <span>{{ item.frequency || 'N/A' }}</span>
+            </div>
+            <div class="detail">
+              <span class="label">Duración:</span>
+              <span>{{ item.duration || 'N/A' }}</span>
+            </div>
+          </div>
+          <p class="notes" *ngIf="item.notes"><strong>Indicaciones:</strong> {{ item.notes }}</p>
+        </div>
+      </div>
+    </main>
+    <footer class="modal-footer">
+      <button class="secondary-btn" (click)="close()">Cerrar</button>
+    </footer>
+  </div>
+</div>

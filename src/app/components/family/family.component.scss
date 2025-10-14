@@ -1,0 +1,84 @@
+// src/app/components/family/family.component.scss
+
+.page-header {
+  margin-bottom: 2rem;
+  h1 { font-size: 2rem; color: var(--dark-blue); }
+  p { color: var(--text-muted); }
+}
+
+.family-layout {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+.add-family-section, .family-list-section {
+  background: var(--white);
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.add-form {
+  display: flex;
+  gap: 0.5rem;
+  input {
+    flex-grow: 1;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1rem;
+  }
+  button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0 1.5rem;
+    font-weight: 500;
+    cursor: pointer;
+    &:disabled {
+      background-color: #a0c7e4;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.members-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.member-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+
+  p { font-weight: 500; margin: 0; }
+  span { font-size: 0.9rem; color: var(--text-muted); }
+  
+  &.primary {
+    background-color: #e7f1ff;
+    border-color: var(--primary-color);
+  }
+}
+.empty-list {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  text-align: center;
+  padding: 1.5rem 0;
+}

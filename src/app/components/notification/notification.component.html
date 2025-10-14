@@ -1,0 +1,7 @@
+<div class="notification-container">
+    <div *ngFor="let notification of notificationService.notifications()" 
+             class="toast" 
+            [ngClass]="notification.type">
+        {{ notification.message }}
+    </div>
+</div>

@@ -1,0 +1,247 @@
+// src/app/components/landing/landing.component.scss
+
+:host {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+// Contenedor que centra el contenido en todas las secciones
+.content-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 5rem 2rem;
+}
+
+.section-title {
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--dark-blue);
+  margin-bottom: 3rem;
+}
+
+.section-subtitle {
+  text-align: center;
+  color: var(--text-muted);
+  max-width: 600px;
+  margin: -2rem auto 3rem auto;
+  font-size: 1.1rem;
+}
+
+// Hero Section (Sección Principal)
+.hero-section {
+  width: 100%;
+   background: linear-gradient(135deg, #f8f9fa 0%, #eef2f5 100%);
+  display: flex;
+  align-items: center;
+
+  .content-container {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+  }
+
+  .hero-text {
+    flex: 1;
+    h1 {
+      font-size: 3.8rem;
+      font-weight: 800; // Más grueso
+      line-height: 1.2;
+      margin-bottom: 1rem;
+      // Texto con gradiente para un look moderno
+      background: linear-gradient(90deg, var(--primary-color), var(--dark-blue));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    p {
+      font-size: 1.2rem;
+      color: var(--text-muted);
+      margin-bottom: 2.5rem;
+    }
+    .cta-btn {
+      background: var(--primary-color);
+      color: white;
+      padding: 1rem 2.5rem;
+      font-size: 1.1rem;
+      border: none;
+      border-radius: 999px; // Botón "píldora"
+      box-shadow: 0 4px 15px rgba(13, 110, 253, 0.4);
+      transition: all 0.3s ease;
+      &:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(13, 110, 253, 0.5);
+      }
+    }
+  }
+
+  .hero-image {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    img {
+      max-width: 100%;
+      border-radius: 16px;
+    }
+  }
+}
+
+// Features Section (Características)
+.features-section {
+  background-color: var(--white);
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  text-align: center;
+}
+
+.feature-card {
+  background: var(--white);
+  padding: 2.5rem 2rem;
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  // Añadimos un borde superior de color
+  border-top: 4px solid var(--primary-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+  &:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  .icon-wrapper {
+    margin: 0 auto 1.5rem auto;
+    background: linear-gradient(135deg, var(--primary-color), #0b5ed7);
+    color: white;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(13, 110, 253, 0.3);
+  }
+
+  h3 {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+  }
+
+  p {
+    color: var(--text-muted);
+  }
+}
+
+// Specialties Section (Especialidades)
+.specialties-section {
+  background-color: #f8f9fa;
+}
+
+.specialties-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+.specialty-card {
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative; // Necesario para el overlay
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+  &:hover {
+    transform: scale(1.05);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  }
+
+  img {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+    display: block;
+  }
+
+  .card-content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 1.5rem;
+    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+    
+    h3 {
+      font-size: 1.5rem;
+      margin: 0;
+      color: var(--white);
+    }
+  }
+}
+
+// Testimonials Section (Testimonios)
+.testimonials-section {
+  background-color: var(--white);
+}
+
+.testimonials-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+}
+
+.testimonial-card {
+  background: #f0f4f8; // Fondo sutil
+  padding: 2rem;
+  border-radius: 12px;
+  text-align: center;
+  position: relative;
+
+  &::before {
+    content: '“';
+    position: absolute;
+    top: 0.5rem;
+    left: 1rem;
+    font-size: 5rem;
+    color: var(--primary-color);
+    opacity: 0.1;
+    line-height: 1;
+  }
+
+  img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin: 0 auto 1rem auto;
+    border: 4px solid white;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  }
+  .quote {
+    font-style: italic;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+    position: relative;
+    z-index: 2;
+  }
+  .author {
+    font-weight: 600;
+    color: var(--primary-color);
+  }
+}
+
+// Footer
+.main-footer {
+  background-color: var(--dark-blue);
+  color: #adb5bd;
+  text-align: center;
+
+  .content-container {
+    padding: 3rem 2rem;
+  }
+}

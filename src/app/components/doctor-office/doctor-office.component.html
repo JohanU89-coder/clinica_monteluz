@@ -1,0 +1,48 @@
+<div class="page-container">
+  <header class="page-header">
+    <h1>Mi Consultorio</h1>
+    <p>Administra tus horarios de atención semanales.</p>
+  </header>
+
+  <div class="office-layout">
+    <section class="schedule-list-section">
+      <h3>Mis Horarios Actuales</h3>
+      <ul class="schedule-list" *ngIf="scheduleService.mySchedule().length > 0; else noSchedules">
+        <li *ngFor="let schedule of scheduleService.mySchedule()">
+          <div class="schedule-info">
+            <span class="day">{{ getDayName(schedule.day_of_week) }}</span>
+            <span class="time">{{ schedule.start_time }} - {{ schedule.end_time }}</span>
+          </div>
+          <button class="delete-btn" (click)="handleDeleteSchedule(schedule.id)">Eliminar</button>
+        </li>
+      </ul>
+      <ng-template #noSchedules>
+        <p class="empty-state">Aún no has configurado ningún horario de atención.</p>
+      </ng-template>
+    </section>
+
+    <section class="add-schedule-section">
+      <h3>Añadir Nuevo Horario</h3>
+      <form [formGroup]="scheduleForm" (ngSubmit)="handleAddSchedule()" class="schedule-form">
+        <div class="form-group">
+          <label for="day">Día de la semana</label>
+          <select id="day" formControlName="day">
+            <option [ngValue]="null" disabled>Selecciona un día...</option>
+            <option *ngFor="let day of daysOfWeek" [value]="day.id">{{ day.name }}</option>
+          </select>
+        </div>
+        <div class="form-group-inline">
+          <div class="form-group">
+            <label for="startTime">Hora de Inicio</label>
+            <input id="startTime" type="time" formControlName="startTime">
+          </div>
+          <div class="form-group">
+            <label for="endTime">Hora de Fin</label>
+            <input id="endTime" type="time" formControlName="endTime">
+          </div>
+        </div>
+        <button type="submit" [disabled]="scheduleForm.invalid" class="add-btn">Añadir Horario</button>
+      </form>
+    </section>
+  </div>
+</div>

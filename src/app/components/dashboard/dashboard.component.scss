@@ -1,0 +1,85 @@
+// src/app/components/dashboard/dashboard.component.scss
+
+:host {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    background-color: #fff;
+}
+
+.dashboard-layout {
+    display: flex;
+    width: 100%;
+}
+
+.sidebar {
+    // ELIMINAMOS EL ANCHO FIJO DE AQUÍ
+    // width: 260px; 
+    
+    background-color: #0d1b2a;
+    color: #e0e1dd;
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem; // Mantenemos el espaciado
+    flex-shrink: 0; // Evita que el sidebar se encoja
+}
+
+.sidebar .header {
+    text-align: center;
+    margin-bottom: 2rem;
+    h3 { 
+      color: var(--white);
+      font-weight: 600; 
+    }
+}
+
+.sidebar .profile-summary {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #415a77;
+    h4 { 
+      color: var(--white);
+      font-size: 1.1rem; 
+    }
+    .role {
+        font-size: 0.9rem;
+        color: #778da9;
+        text-transform: capitalize;
+    }
+}
+
+.sidebar .nav-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex-grow: 1;
+
+    button {
+        // ANCHO FIJO PARA LOS BOTONES
+        width: 200px; 
+        text-align: left;
+        padding: 0.8rem 1rem;
+        background: transparent;
+        color: #e0e1dd;
+        border: none;
+        font-size: 1rem;
+
+        &.active, &:hover {
+            background-color: #415a77;
+        }
+    }
+}
+
+.sidebar .logout-btn {
+    // ANCHO FIJO PARA EL BOTÓN DE CERRAR SESIÓN
+    width: 200px; 
+    background-color: #778da9;
+    color: white;
+}
+
+.main-content {
+    flex-grow: 1;
+    padding: 2rem 3rem;
+    overflow-y: auto;
+}
