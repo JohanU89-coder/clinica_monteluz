@@ -1,0 +1,10 @@
+com\clinica\config\WebConfig.class
+com\clinica\service\SupabaseService.class
+com\clinica\controller\PrescriptionController.class
+com\clinica\model\AppointmentDTO.class
+com\clinica\model\PrescriptionDTO.class
+com\clinica\model\ProfileDTO.class
+com\clinica\model\PrescriptionItemDTO.class
+com\clinica\ClinicaApplication.class
+com\clinica\model\SpecialtyDTO.class
+com\clinica\service\PdfGenerationService.class

@@ -149,4 +149,34 @@ export class AppointmentService {
       this.loadingService.hide();
     }
   }
+
+  async exportPrescriptionPdf(appointmentId: number) {
+  this.loadingService.show();
+  try {
+    const response = await fetch(`http://localhost:8080/api/appointments/${appointmentId}/export-pdf`);
+    
+    if (!response.ok) {
+      this.notificationService.showError('No se pudo generar la receta.');
+      return;
+    }
+    
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `receta-monteluz-${appointmentId}.docx`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+    
+    this.notificationService.showSuccess('Receta descargada correctamente.');
+  } catch (error) {
+    console.error('Error al exportar receta:', error);
+    this.notificationService.showError('Error al descargar la receta.');
+  } finally {
+    this.loadingService.hide();
+  }
+}
+
 }

@@ -4,6 +4,7 @@
     <p>Aquí puedes ver todas tus citas.</p>
   </header>
 
+
   <div class="appointment-list">
     <ng-container *ngIf="appointments().length > 0; else noAppointments">
       <div *ngFor="let apt of appointments()" class="appointment-card-wrapper">
@@ -13,6 +14,7 @@
             <span class="month">{{ apt.appointment_time | date:'MMM':'':'es-PE' }}</span>
             <span class="day">{{ apt.appointment_time | date:'d' }}</span>
           </div>
+
 
           <div class="info-block">
             <ng-container *ngIf="userRole() === 'patient'">
@@ -42,6 +44,7 @@
               </div>
             </ng-container>
 
+
             <ng-container *ngIf="userRole() === 'doctor'">
               <div class="person-details">
                 <div class="icon">
@@ -56,6 +59,7 @@
                 </div>
               </div>
             </ng-container>
+
 
             <div class="time-details">
               <div class="icon">
@@ -77,6 +81,7 @@
             </div>
           </div>
 
+
           <div class="action-block">
             <span *ngIf="listType === 'past'" class="status-badge" [ngClass]="apt.status">{{ apt.status | titlecase }}</span>
             <ng-container *ngIf="listType === 'upcoming'">
@@ -89,14 +94,24 @@
               <button class="action-btn" *ngIf="userRole() === 'doctor'" (click)="openEditor(apt.id)">
                 {{ apt.diagnosis ? 'Ver Detalles' : 'Añadir Diagnóstico' }}
               </button>
-              <!-- CAMBIO AQUÍ: Usar createPrescription en lugar de prescriptionService.startCreation -->
               <button class="action-btn" *ngIf="userRole() === 'doctor' && !apt.prescriptions?.length" (click)="createPrescription(apt)">Crear Receta</button>
               <button class="action-btn" *ngIf="userRole() === 'patient' && !apt.rating" (click)="openEditor(apt.id)">Calificar</button>
               <button class="action-btn" *ngIf="userRole() === 'patient' && (apt.diagnosis || apt.rating)" (click)="openEditor(apt.id)">Ver Detalles</button>
               <button class="action-btn" *ngIf="apt.prescriptions?.length" (click)="prescriptionService.view(apt.prescriptions![0]!.id)">Ver Receta</button>
+              
+              <!-- BOTÓN NUEVO: Exportar Receta -->
+              <button class="action-btn export-btn" *ngIf="apt.prescriptions?.length" (click)="appointmentService.exportPrescriptionPdf(apt.id)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                Exportar Receta
+              </button>
             </ng-container>
           </div>
         </div>
+
 
         <div class="expandable-form" *ngIf="editingAppointmentId() === apt.id">
           <ng-container *ngIf="userRole() === 'doctor'">
@@ -146,13 +161,16 @@
             </div>
           </ng-container>
 
+
           <div class="form-actions close-action">
             <button class="secondary-btn" (click)="closeEditor()">Cerrar</button>
           </div>
         </div>
 
+
       </div>
     </ng-container>
+
 
     <ng-template #noAppointments>
       <div class="empty-state"><p>No tienes citas en esta lista.</p></div>
