@@ -63,3 +63,5 @@ For more information on using the Angular CLI, including detailed command refere
 
 rama jhair
 Prueba 2
+### Aporte individual - Juan Cruz 
+- Changes in index.html file I added a title with my name.
