@@ -892,11 +892,10 @@ var require_PostgrestQueryBuilder = __commonJS({
        * `"estimated"`: Uses exact count for low numbers and planned count for high
        * numbers.
        */
-      select(columns, options) {
-        const {
-          head: head2 = false,
-          count
-        } = options !== null && options !== void 0 ? options : {};
+      select(columns, {
+        head: head2 = false,
+        count
+      } = {}) {
         const method = head2 ? "HEAD" : "GET";
         let quoted = false;
         const cleanedColumns = (columns !== null && columns !== void 0 ? columns : "*").split("").map((c) => {
@@ -1387,9 +1386,9 @@ var FunctionsClient = class {
    * @param functionName - The name of the Function to invoke.
    * @param options - Options for invoking the Function.
    */
-  invoke(functionName_1) {
-    return __awaiter(this, arguments, void 0, function* (functionName, options = {}) {
-      var _a;
+  invoke(functionName, options = {}) {
+    var _a;
+    return __awaiter(this, void 0, void 0, function* () {
       try {
         const {
           headers,
@@ -1588,7 +1587,7 @@ Suggested solution: ${env.workaround}`;
 var websocket_factory_default = WebSocketFactory;
 
 // node_modules/@supabase/realtime-js/dist/module/lib/version.js
-var version = "2.75.0";
+var version = "2.15.5";
 
 // node_modules/@supabase/realtime-js/dist/module/lib/constants.js
 var DEFAULT_VERSION = `realtime-js/${version}`;
@@ -1725,9 +1724,6 @@ var PostgresTypes;
 var convertChangeData = (columns, record, options = {}) => {
   var _a;
   const skipTypes = (_a = options.skipTypes) !== null && _a !== void 0 ? _a : [];
-  if (!record) {
-    return {};
-  }
   return Object.keys(record).reduce((acc, rec_key) => {
     acc[rec_key] = convertColumn(rec_key, columns, record, skipTypes);
     return acc;
@@ -2225,7 +2221,6 @@ var RealtimeChannel = class _RealtimeChannel {
   constructor(topic, params = {
     config: {}
   }, socket) {
-    var _a, _b;
     this.topic = topic;
     this.params = params;
     this.socket = socket;
@@ -2290,9 +2285,6 @@ var RealtimeChannel = class _RealtimeChannel {
     this.presence = new RealtimePresence(this);
     this.broadcastEndpointURL = httpEndpointURL(this.socket.endPoint);
     this.private = this.params.config.private || false;
-    if (!this.private && ((_b = (_a = this.params.config) === null || _a === void 0 ? void 0 : _a.broadcast) === null || _b === void 0 ? void 0 : _b.replay)) {
-      throw `tried to use replay on public channel '${this.topic}'. It must be a private channel.`;
-    }
   }
   /** Subscribe registers your client with the server */
   subscribe(callback, timeout = this.timeout) {
@@ -4463,7 +4455,7 @@ var StorageFileApi = class {
 };
 
 // node_modules/@supabase/storage-js/dist/module/lib/version.js
-var version2 = "2.75.0";
+var version2 = "2.12.2";
 
 // node_modules/@supabase/storage-js/dist/module/lib/constants.js
 var DEFAULT_HEADERS = {
@@ -4508,7 +4500,7 @@ var StorageBucketApi = class {
         baseUrl.hostname = baseUrl.hostname.replace("supabase.", "storage.supabase.");
       }
     }
-    this.url = baseUrl.href.replace(/\/$/, "");
+    this.url = baseUrl.href;
     this.headers = Object.assign(Object.assign({}, DEFAULT_HEADERS), headers);
     this.fetch = resolveFetch2(fetch2);
   }
@@ -4590,10 +4582,10 @@ var StorageBucketApi = class {
    * @param options.type (private-beta) specifies the bucket type. see `BucketType` for more details.
    *   - default bucket type is `STANDARD`
    */
-  createBucket(id_1) {
-    return __awaiter7(this, arguments, void 0, function* (id, options = {
-      public: false
-    }) {
+  createBucket(id, options = {
+    public: false
+  }) {
+    return __awaiter7(this, void 0, void 0, function* () {
       try {
         const data = yield post(this.fetch, `${this.url}/bucket`, {
           id,
@@ -4742,7 +4734,7 @@ var StorageClient = class extends StorageBucketApi {
 };
 
 // node_modules/@supabase/supabase-js/dist/module/lib/version.js
-var version3 = "2.75.0";
+var version3 = "2.58.0";
 
 // node_modules/@supabase/supabase-js/dist/module/lib/constants.js
 var JS_ENV = "";
@@ -4917,7 +4909,7 @@ function validateSupabaseUrl(supabaseUrl) {
 }
 
 // node_modules/@supabase/auth-js/dist/module/lib/version.js
-var version4 = "2.75.0";
+var version4 = "2.72.0";
 
 // node_modules/@supabase/auth-js/dist/module/lib/constants.js
 var AUTO_REFRESH_TICK_DURATION_MS = 30 * 1e3;
@@ -5709,13 +5701,6 @@ var GoTrueAdminApi = class {
       listFactors: this._listFactors.bind(this),
       deleteFactor: this._deleteFactor.bind(this)
     };
-    this.oauth = {
-      listClients: this._listOAuthClients.bind(this),
-      createClient: this._createOAuthClient.bind(this),
-      getClient: this._getOAuthClient.bind(this),
-      deleteClient: this._deleteOAuthClient.bind(this),
-      regenerateClientSecret: this._regenerateOAuthClientSecret.bind(this)
-    };
   }
   /**
    * Removes a logged-in session.
@@ -6041,176 +6026,6 @@ var GoTrueAdminApi = class {
       }
     });
   }
-  /**
-   * Lists all OAuth clients with optional pagination.
-   * Only relevant when the OAuth 2.1 server is enabled in Supabase Auth.
-   *
-   * This function should only be called on a server. Never expose your `service_role` key in the browser.
-   */
-  _listOAuthClients(params) {
-    return __async(this, null, function* () {
-      var _a, _b, _c, _d, _e, _f, _g;
-      try {
-        const pagination = {
-          nextPage: null,
-          lastPage: 0,
-          total: 0
-        };
-        const response = yield _request(this.fetch, "GET", `${this.url}/admin/oauth/clients`, {
-          headers: this.headers,
-          noResolveJson: true,
-          query: {
-            page: (_b = (_a = params === null || params === void 0 ? void 0 : params.page) === null || _a === void 0 ? void 0 : _a.toString()) !== null && _b !== void 0 ? _b : "",
-            per_page: (_d = (_c = params === null || params === void 0 ? void 0 : params.perPage) === null || _c === void 0 ? void 0 : _c.toString()) !== null && _d !== void 0 ? _d : ""
-          },
-          xform: _noResolveJsonResponse
-        });
-        if (response.error) throw response.error;
-        const clients = yield response.json();
-        const total = (_e = response.headers.get("x-total-count")) !== null && _e !== void 0 ? _e : 0;
-        const links = (_g = (_f = response.headers.get("link")) === null || _f === void 0 ? void 0 : _f.split(",")) !== null && _g !== void 0 ? _g : [];
-        if (links.length > 0) {
-          links.forEach((link) => {
-            const page = parseInt(link.split(";")[0].split("=")[1].substring(0, 1));
-            const rel = JSON.parse(link.split(";")[1].split("=")[1]);
-            pagination[`${rel}Page`] = page;
-          });
-          pagination.total = parseInt(total);
-        }
-        return {
-          data: Object.assign(Object.assign({}, clients), pagination),
-          error: null
-        };
-      } catch (error) {
-        if (isAuthError(error)) {
-          return {
-            data: {
-              clients: []
-            },
-            error
-          };
-        }
-        throw error;
-      }
-    });
-  }
-  /**
-   * Creates a new OAuth client.
-   * Only relevant when the OAuth 2.1 server is enabled in Supabase Auth.
-   *
-   * This function should only be called on a server. Never expose your `service_role` key in the browser.
-   */
-  _createOAuthClient(params) {
-    return __async(this, null, function* () {
-      try {
-        return yield _request(this.fetch, "POST", `${this.url}/admin/oauth/clients`, {
-          body: params,
-          headers: this.headers,
-          xform: (client) => {
-            return {
-              data: client,
-              error: null
-            };
-          }
-        });
-      } catch (error) {
-        if (isAuthError(error)) {
-          return {
-            data: null,
-            error
-          };
-        }
-        throw error;
-      }
-    });
-  }
-  /**
-   * Gets details of a specific OAuth client.
-   * Only relevant when the OAuth 2.1 server is enabled in Supabase Auth.
-   *
-   * This function should only be called on a server. Never expose your `service_role` key in the browser.
-   */
-  _getOAuthClient(clientId) {
-    return __async(this, null, function* () {
-      try {
-        return yield _request(this.fetch, "GET", `${this.url}/admin/oauth/clients/${clientId}`, {
-          headers: this.headers,
-          xform: (client) => {
-            return {
-              data: client,
-              error: null
-            };
-          }
-        });
-      } catch (error) {
-        if (isAuthError(error)) {
-          return {
-            data: null,
-            error
-          };
-        }
-        throw error;
-      }
-    });
-  }
-  /**
-   * Deletes an OAuth client.
-   * Only relevant when the OAuth 2.1 server is enabled in Supabase Auth.
-   *
-   * This function should only be called on a server. Never expose your `service_role` key in the browser.
-   */
-  _deleteOAuthClient(clientId) {
-    return __async(this, null, function* () {
-      try {
-        return yield _request(this.fetch, "DELETE", `${this.url}/admin/oauth/clients/${clientId}`, {
-          headers: this.headers,
-          xform: (client) => {
-            return {
-              data: client,
-              error: null
-            };
-          }
-        });
-      } catch (error) {
-        if (isAuthError(error)) {
-          return {
-            data: null,
-            error
-          };
-        }
-        throw error;
-      }
-    });
-  }
-  /**
-   * Regenerates the secret for an OAuth client.
-   * Only relevant when the OAuth 2.1 server is enabled in Supabase Auth.
-   *
-   * This function should only be called on a server. Never expose your `service_role` key in the browser.
-   */
-  _regenerateOAuthClientSecret(clientId) {
-    return __async(this, null, function* () {
-      try {
-        return yield _request(this.fetch, "POST", `${this.url}/admin/oauth/clients/${clientId}/regenerate_secret`, {
-          headers: this.headers,
-          xform: (client) => {
-            return {
-              data: client,
-              error: null
-            };
-          }
-        });
-      } catch (error) {
-        if (isAuthError(error)) {
-          return {
-            data: null,
-            error
-          };
-        }
-        throw error;
-      }
-    });
-  }
 };
 
 // node_modules/@supabase/auth-js/dist/module/lib/local-storage.js
@@ -6226,6 +6041,25 @@ function memoryLocalStorageAdapter(store = {}) {
       delete store[key];
     }
   };
+}
+
+// node_modules/@supabase/auth-js/dist/module/lib/polyfills.js
+function polyfillGlobalThis() {
+  if (typeof globalThis === "object") return;
+  try {
+    Object.defineProperty(Object.prototype, "__magic__", {
+      get: function() {
+        return this;
+      },
+      configurable: true
+    });
+    __magic__.globalThis = __magic__;
+    delete Object.prototype.__magic__;
+  } catch (e) {
+    if (typeof self !== "undefined") {
+      self.globalThis = self;
+    }
+  }
 }
 
 // node_modules/@supabase/auth-js/dist/module/lib/locks.js
@@ -6329,25 +6163,6 @@ function processLock(name, acquireTimeout, fn) {
   });
 }
 
-// node_modules/@supabase/auth-js/dist/module/lib/polyfills.js
-function polyfillGlobalThis() {
-  if (typeof globalThis === "object") return;
-  try {
-    Object.defineProperty(Object.prototype, "__magic__", {
-      get: function() {
-        return this;
-      },
-      configurable: true
-    });
-    __magic__.globalThis = __magic__;
-    delete Object.prototype.__magic__;
-  } catch (e) {
-    if (typeof self !== "undefined") {
-      self.globalThis = self;
-    }
-  }
-}
-
 // node_modules/@supabase/auth-js/dist/module/lib/web3/ethereum.js
 function getAddress(address) {
   if (!/^0x[a-fA-F0-9]{40}$/.test(address)) {
@@ -6418,826 +6233,6 @@ Request ID: ${requestId}`;
 ${suffix}`;
 }
 
-// node_modules/@supabase/auth-js/dist/module/lib/webauthn.errors.js
-var WebAuthnError = class extends Error {
-  constructor({
-    message,
-    code,
-    cause,
-    name
-  }) {
-    var _a;
-    super(message, {
-      cause
-    });
-    this.__isWebAuthnError = true;
-    this.name = (_a = name !== null && name !== void 0 ? name : cause instanceof Error ? cause.name : void 0) !== null && _a !== void 0 ? _a : "Unknown Error";
-    this.code = code;
-  }
-};
-var WebAuthnUnknownError = class extends WebAuthnError {
-  constructor(message, originalError) {
-    super({
-      code: "ERROR_PASSTHROUGH_SEE_CAUSE_PROPERTY",
-      cause: originalError,
-      message
-    });
-    this.name = "WebAuthnUnknownError";
-    this.originalError = originalError;
-  }
-};
-function identifyRegistrationError({
-  error,
-  options
-}) {
-  var _a, _b, _c;
-  const {
-    publicKey
-  } = options;
-  if (!publicKey) {
-    throw Error("options was missing required publicKey property");
-  }
-  if (error.name === "AbortError") {
-    if (options.signal instanceof AbortSignal) {
-      return new WebAuthnError({
-        message: "Registration ceremony was sent an abort signal",
-        code: "ERROR_CEREMONY_ABORTED",
-        cause: error
-      });
-    }
-  } else if (error.name === "ConstraintError") {
-    if (((_a = publicKey.authenticatorSelection) === null || _a === void 0 ? void 0 : _a.requireResidentKey) === true) {
-      return new WebAuthnError({
-        message: "Discoverable credentials were required but no available authenticator supported it",
-        code: "ERROR_AUTHENTICATOR_MISSING_DISCOVERABLE_CREDENTIAL_SUPPORT",
-        cause: error
-      });
-    } else if (
-      // @ts-ignore: `mediation` doesn't yet exist on CredentialCreationOptions but it's possible as of Sept 2024
-      options.mediation === "conditional" && ((_b = publicKey.authenticatorSelection) === null || _b === void 0 ? void 0 : _b.userVerification) === "required"
-    ) {
-      return new WebAuthnError({
-        message: "User verification was required during automatic registration but it could not be performed",
-        code: "ERROR_AUTO_REGISTER_USER_VERIFICATION_FAILURE",
-        cause: error
-      });
-    } else if (((_c = publicKey.authenticatorSelection) === null || _c === void 0 ? void 0 : _c.userVerification) === "required") {
-      return new WebAuthnError({
-        message: "User verification was required but no available authenticator supported it",
-        code: "ERROR_AUTHENTICATOR_MISSING_USER_VERIFICATION_SUPPORT",
-        cause: error
-      });
-    }
-  } else if (error.name === "InvalidStateError") {
-    return new WebAuthnError({
-      message: "The authenticator was previously registered",
-      code: "ERROR_AUTHENTICATOR_PREVIOUSLY_REGISTERED",
-      cause: error
-    });
-  } else if (error.name === "NotAllowedError") {
-    return new WebAuthnError({
-      message: error.message,
-      code: "ERROR_PASSTHROUGH_SEE_CAUSE_PROPERTY",
-      cause: error
-    });
-  } else if (error.name === "NotSupportedError") {
-    const validPubKeyCredParams = publicKey.pubKeyCredParams.filter((param) => param.type === "public-key");
-    if (validPubKeyCredParams.length === 0) {
-      return new WebAuthnError({
-        message: 'No entry in pubKeyCredParams was of type "public-key"',
-        code: "ERROR_MALFORMED_PUBKEYCREDPARAMS",
-        cause: error
-      });
-    }
-    return new WebAuthnError({
-      message: "No available authenticator supported any of the specified pubKeyCredParams algorithms",
-      code: "ERROR_AUTHENTICATOR_NO_SUPPORTED_PUBKEYCREDPARAMS_ALG",
-      cause: error
-    });
-  } else if (error.name === "SecurityError") {
-    const effectiveDomain = window.location.hostname;
-    if (!isValidDomain(effectiveDomain)) {
-      return new WebAuthnError({
-        message: `${window.location.hostname} is an invalid domain`,
-        code: "ERROR_INVALID_DOMAIN",
-        cause: error
-      });
-    } else if (publicKey.rp.id !== effectiveDomain) {
-      return new WebAuthnError({
-        message: `The RP ID "${publicKey.rp.id}" is invalid for this domain`,
-        code: "ERROR_INVALID_RP_ID",
-        cause: error
-      });
-    }
-  } else if (error.name === "TypeError") {
-    if (publicKey.user.id.byteLength < 1 || publicKey.user.id.byteLength > 64) {
-      return new WebAuthnError({
-        message: "User ID was not between 1 and 64 characters",
-        code: "ERROR_INVALID_USER_ID_LENGTH",
-        cause: error
-      });
-    }
-  } else if (error.name === "UnknownError") {
-    return new WebAuthnError({
-      message: "The authenticator was unable to process the specified options, or could not create a new credential",
-      code: "ERROR_AUTHENTICATOR_GENERAL_ERROR",
-      cause: error
-    });
-  }
-  return new WebAuthnError({
-    message: "a Non-Webauthn related error has occurred",
-    code: "ERROR_PASSTHROUGH_SEE_CAUSE_PROPERTY",
-    cause: error
-  });
-}
-function identifyAuthenticationError({
-  error,
-  options
-}) {
-  const {
-    publicKey
-  } = options;
-  if (!publicKey) {
-    throw Error("options was missing required publicKey property");
-  }
-  if (error.name === "AbortError") {
-    if (options.signal instanceof AbortSignal) {
-      return new WebAuthnError({
-        message: "Authentication ceremony was sent an abort signal",
-        code: "ERROR_CEREMONY_ABORTED",
-        cause: error
-      });
-    }
-  } else if (error.name === "NotAllowedError") {
-    return new WebAuthnError({
-      message: error.message,
-      code: "ERROR_PASSTHROUGH_SEE_CAUSE_PROPERTY",
-      cause: error
-    });
-  } else if (error.name === "SecurityError") {
-    const effectiveDomain = window.location.hostname;
-    if (!isValidDomain(effectiveDomain)) {
-      return new WebAuthnError({
-        message: `${window.location.hostname} is an invalid domain`,
-        code: "ERROR_INVALID_DOMAIN",
-        cause: error
-      });
-    } else if (publicKey.rpId !== effectiveDomain) {
-      return new WebAuthnError({
-        message: `The RP ID "${publicKey.rpId}" is invalid for this domain`,
-        code: "ERROR_INVALID_RP_ID",
-        cause: error
-      });
-    }
-  } else if (error.name === "UnknownError") {
-    return new WebAuthnError({
-      message: "The authenticator was unable to process the specified options, or could not create a new assertion signature",
-      code: "ERROR_AUTHENTICATOR_GENERAL_ERROR",
-      cause: error
-    });
-  }
-  return new WebAuthnError({
-    message: "a Non-Webauthn related error has occurred",
-    code: "ERROR_PASSTHROUGH_SEE_CAUSE_PROPERTY",
-    cause: error
-  });
-}
-
-// node_modules/@supabase/auth-js/dist/module/lib/webauthn.js
-var __rest3 = function(s, e) {
-  var t = {};
-  for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0) t[p] = s[p];
-  if (s != null && typeof Object.getOwnPropertySymbols === "function") for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-    if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i])) t[p[i]] = s[p[i]];
-  }
-  return t;
-};
-var WebAuthnAbortService = class {
-  /**
-   * Create an abort signal for a new WebAuthn operation.
-   * Automatically cancels any existing operation.
-   *
-   * @returns {AbortSignal} Signal to pass to navigator.credentials.create() or .get()
-   * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal MDN - AbortSignal}
-   */
-  createNewAbortSignal() {
-    if (this.controller) {
-      const abortError = new Error("Cancelling existing WebAuthn API call for new one");
-      abortError.name = "AbortError";
-      this.controller.abort(abortError);
-    }
-    const newController = new AbortController();
-    this.controller = newController;
-    return newController.signal;
-  }
-  /**
-   * Manually cancel the current WebAuthn operation.
-   * Useful for cleaning up when user cancels or navigates away.
-   *
-   * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/AbortController/abort MDN - AbortController.abort}
-   */
-  cancelCeremony() {
-    if (this.controller) {
-      const abortError = new Error("Manually cancelling existing WebAuthn API call");
-      abortError.name = "AbortError";
-      this.controller.abort(abortError);
-      this.controller = void 0;
-    }
-  }
-};
-var webAuthnAbortService = new WebAuthnAbortService();
-function deserializeCredentialCreationOptions(options) {
-  if (!options) {
-    throw new Error("Credential creation options are required");
-  }
-  if (typeof PublicKeyCredential !== "undefined" && "parseCreationOptionsFromJSON" in PublicKeyCredential && typeof PublicKeyCredential.parseCreationOptionsFromJSON === "function") {
-    return PublicKeyCredential.parseCreationOptionsFromJSON(
-      /** we assert the options here as typescript still doesn't know about future webauthn types */
-      options
-    );
-  }
-  const {
-    challenge: challengeStr,
-    user: userOpts,
-    excludeCredentials
-  } = options, restOptions = __rest3(
-    options,
-    ["challenge", "user", "excludeCredentials"]
-  );
-  const challenge = base64UrlToUint8Array(challengeStr).buffer;
-  const user = Object.assign(Object.assign({}, userOpts), {
-    id: base64UrlToUint8Array(userOpts.id).buffer
-  });
-  const result = Object.assign(Object.assign({}, restOptions), {
-    challenge,
-    user
-  });
-  if (excludeCredentials && excludeCredentials.length > 0) {
-    result.excludeCredentials = new Array(excludeCredentials.length);
-    for (let i = 0; i < excludeCredentials.length; i++) {
-      const cred = excludeCredentials[i];
-      result.excludeCredentials[i] = Object.assign(Object.assign({}, cred), {
-        id: base64UrlToUint8Array(cred.id).buffer,
-        type: cred.type || "public-key",
-        // Cast transports to handle future transport types like "cable"
-        transports: cred.transports
-      });
-    }
-  }
-  return result;
-}
-function deserializeCredentialRequestOptions(options) {
-  if (!options) {
-    throw new Error("Credential request options are required");
-  }
-  if (typeof PublicKeyCredential !== "undefined" && "parseRequestOptionsFromJSON" in PublicKeyCredential && typeof PublicKeyCredential.parseRequestOptionsFromJSON === "function") {
-    return PublicKeyCredential.parseRequestOptionsFromJSON(options);
-  }
-  const {
-    challenge: challengeStr,
-    allowCredentials
-  } = options, restOptions = __rest3(
-    options,
-    ["challenge", "allowCredentials"]
-  );
-  const challenge = base64UrlToUint8Array(challengeStr).buffer;
-  const result = Object.assign(Object.assign({}, restOptions), {
-    challenge
-  });
-  if (allowCredentials && allowCredentials.length > 0) {
-    result.allowCredentials = new Array(allowCredentials.length);
-    for (let i = 0; i < allowCredentials.length; i++) {
-      const cred = allowCredentials[i];
-      result.allowCredentials[i] = Object.assign(Object.assign({}, cred), {
-        id: base64UrlToUint8Array(cred.id).buffer,
-        type: cred.type || "public-key",
-        // Cast transports to handle future transport types like "cable"
-        transports: cred.transports
-      });
-    }
-  }
-  return result;
-}
-function serializeCredentialCreationResponse(credential) {
-  var _a;
-  if ("toJSON" in credential && typeof credential.toJSON === "function") {
-    return credential.toJSON();
-  }
-  const credentialWithAttachment = credential;
-  return {
-    id: credential.id,
-    rawId: credential.id,
-    response: {
-      attestationObject: bytesToBase64URL(new Uint8Array(credential.response.attestationObject)),
-      clientDataJSON: bytesToBase64URL(new Uint8Array(credential.response.clientDataJSON))
-    },
-    type: "public-key",
-    clientExtensionResults: credential.getClientExtensionResults(),
-    // Convert null to undefined and cast to AuthenticatorAttachment type
-    authenticatorAttachment: (_a = credentialWithAttachment.authenticatorAttachment) !== null && _a !== void 0 ? _a : void 0
-  };
-}
-function serializeCredentialRequestResponse(credential) {
-  var _a;
-  if ("toJSON" in credential && typeof credential.toJSON === "function") {
-    return credential.toJSON();
-  }
-  const credentialWithAttachment = credential;
-  const clientExtensionResults = credential.getClientExtensionResults();
-  const assertionResponse = credential.response;
-  return {
-    id: credential.id,
-    rawId: credential.id,
-    // W3C spec expects rawId to match id for JSON format
-    response: {
-      authenticatorData: bytesToBase64URL(new Uint8Array(assertionResponse.authenticatorData)),
-      clientDataJSON: bytesToBase64URL(new Uint8Array(assertionResponse.clientDataJSON)),
-      signature: bytesToBase64URL(new Uint8Array(assertionResponse.signature)),
-      userHandle: assertionResponse.userHandle ? bytesToBase64URL(new Uint8Array(assertionResponse.userHandle)) : void 0
-    },
-    type: "public-key",
-    clientExtensionResults,
-    // Convert null to undefined and cast to AuthenticatorAttachment type
-    authenticatorAttachment: (_a = credentialWithAttachment.authenticatorAttachment) !== null && _a !== void 0 ? _a : void 0
-  };
-}
-function isValidDomain(hostname) {
-  return (
-    // Consider localhost valid as well since it's okay wrt Secure Contexts
-    hostname === "localhost" || /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/i.test(hostname)
-  );
-}
-function browserSupportsWebAuthn() {
-  var _a, _b;
-  return !!(isBrowser() && "PublicKeyCredential" in window && window.PublicKeyCredential && "credentials" in navigator && typeof ((_a = navigator === null || navigator === void 0 ? void 0 : navigator.credentials) === null || _a === void 0 ? void 0 : _a.create) === "function" && typeof ((_b = navigator === null || navigator === void 0 ? void 0 : navigator.credentials) === null || _b === void 0 ? void 0 : _b.get) === "function");
-}
-function createCredential(options) {
-  return __async(this, null, function* () {
-    try {
-      const response = yield navigator.credentials.create(
-        /** we assert the type here until typescript types are updated */
-        options
-      );
-      if (!response) {
-        return {
-          data: null,
-          error: new WebAuthnUnknownError("Empty credential response", response)
-        };
-      }
-      if (!(response instanceof PublicKeyCredential)) {
-        return {
-          data: null,
-          error: new WebAuthnUnknownError("Browser returned unexpected credential type", response)
-        };
-      }
-      return {
-        data: response,
-        error: null
-      };
-    } catch (err) {
-      return {
-        data: null,
-        error: identifyRegistrationError({
-          error: err,
-          options
-        })
-      };
-    }
-  });
-}
-function getCredential(options) {
-  return __async(this, null, function* () {
-    try {
-      const response = yield navigator.credentials.get(
-        /** we assert the type here until typescript types are updated */
-        options
-      );
-      if (!response) {
-        return {
-          data: null,
-          error: new WebAuthnUnknownError("Empty credential response", response)
-        };
-      }
-      if (!(response instanceof PublicKeyCredential)) {
-        return {
-          data: null,
-          error: new WebAuthnUnknownError("Browser returned unexpected credential type", response)
-        };
-      }
-      return {
-        data: response,
-        error: null
-      };
-    } catch (err) {
-      return {
-        data: null,
-        error: identifyAuthenticationError({
-          error: err,
-          options
-        })
-      };
-    }
-  });
-}
-var DEFAULT_CREATION_OPTIONS = {
-  hints: ["security-key"],
-  authenticatorSelection: {
-    authenticatorAttachment: "cross-platform",
-    requireResidentKey: false,
-    /** set to preferred because older yubikeys don't have PIN/Biometric */
-    userVerification: "preferred",
-    residentKey: "discouraged"
-  },
-  attestation: "none"
-};
-var DEFAULT_REQUEST_OPTIONS = {
-  /** set to preferred because older yubikeys don't have PIN/Biometric */
-  userVerification: "preferred",
-  hints: ["security-key"]
-};
-function deepMerge(...sources) {
-  const isObject = (val) => val !== null && typeof val === "object" && !Array.isArray(val);
-  const isArrayBufferLike = (val) => val instanceof ArrayBuffer || ArrayBuffer.isView(val);
-  const result = {};
-  for (const source of sources) {
-    if (!source) continue;
-    for (const key in source) {
-      const value = source[key];
-      if (value === void 0) continue;
-      if (Array.isArray(value)) {
-        result[key] = value;
-      } else if (isArrayBufferLike(value)) {
-        result[key] = value;
-      } else if (isObject(value)) {
-        const existing = result[key];
-        if (isObject(existing)) {
-          result[key] = deepMerge(existing, value);
-        } else {
-          result[key] = deepMerge(value);
-        }
-      } else {
-        result[key] = value;
-      }
-    }
-  }
-  return result;
-}
-function mergeCredentialCreationOptions(baseOptions, overrides) {
-  return deepMerge(DEFAULT_CREATION_OPTIONS, baseOptions, overrides || {});
-}
-function mergeCredentialRequestOptions(baseOptions, overrides) {
-  return deepMerge(DEFAULT_REQUEST_OPTIONS, baseOptions, overrides || {});
-}
-var WebAuthnApi = class {
-  constructor(client) {
-    this.client = client;
-    this.enroll = this._enroll.bind(this);
-    this.challenge = this._challenge.bind(this);
-    this.verify = this._verify.bind(this);
-    this.authenticate = this._authenticate.bind(this);
-    this.register = this._register.bind(this);
-  }
-  /**
-   * Enroll a new WebAuthn factor.
-   * Creates an unverified WebAuthn factor that must be verified with a credential.
-   *
-   * @experimental This method is experimental and may change in future releases
-   * @param {Omit<MFAEnrollWebauthnParams, 'factorType'>} params - Enrollment parameters (friendlyName required)
-   * @returns {Promise<AuthMFAEnrollWebauthnResponse>} Enrolled factor details or error
-   * @see {@link https://w3c.github.io/webauthn/#sctn-registering-a-new-credential W3C WebAuthn Spec - Registering a New Credential}
-   */
-  _enroll(params) {
-    return __async(this, null, function* () {
-      return this.client.mfa.enroll(Object.assign(Object.assign({}, params), {
-        factorType: "webauthn"
-      }));
-    });
-  }
-  /**
-   * Challenge for WebAuthn credential creation or authentication.
-   * Combines server challenge with browser credential operations.
-   * Handles both registration (create) and authentication (request) flows.
-   *
-   * @experimental This method is experimental and may change in future releases
-   * @param {MFAChallengeWebauthnParams & { friendlyName?: string; signal?: AbortSignal }} params - Challenge parameters including factorId
-   * @param {Object} overrides - Allows you to override the parameters passed to navigator.credentials
-   * @param {PublicKeyCredentialCreationOptionsFuture} overrides.create - Override options for credential creation
-   * @param {PublicKeyCredentialRequestOptionsFuture} overrides.request - Override options for credential request
-   * @returns {Promise<RequestResult>} Challenge response with credential or error
-   * @see {@link https://w3c.github.io/webauthn/#sctn-credential-creation W3C WebAuthn Spec - Credential Creation}
-   * @see {@link https://w3c.github.io/webauthn/#sctn-verifying-assertion W3C WebAuthn Spec - Verifying Assertion}
-   */
-  _challenge(_0, _1) {
-    return __async(this, arguments, function* ({
-      factorId,
-      webauthn,
-      friendlyName,
-      signal
-    }, overrides) {
-      try {
-        const {
-          data: challengeResponse,
-          error: challengeError
-        } = yield this.client.mfa.challenge({
-          factorId,
-          webauthn
-        });
-        if (!challengeResponse) {
-          return {
-            data: null,
-            error: challengeError
-          };
-        }
-        const abortSignal = signal !== null && signal !== void 0 ? signal : webAuthnAbortService.createNewAbortSignal();
-        if (challengeResponse.webauthn.type === "create") {
-          const {
-            user
-          } = challengeResponse.webauthn.credential_options.publicKey;
-          if (!user.name) {
-            user.name = `${user.id}:${friendlyName}`;
-          }
-          if (!user.displayName) {
-            user.displayName = user.name;
-          }
-        }
-        switch (challengeResponse.webauthn.type) {
-          case "create": {
-            const options = mergeCredentialCreationOptions(challengeResponse.webauthn.credential_options.publicKey, overrides === null || overrides === void 0 ? void 0 : overrides.create);
-            const {
-              data,
-              error
-            } = yield createCredential({
-              publicKey: options,
-              signal: abortSignal
-            });
-            if (data) {
-              return {
-                data: {
-                  factorId,
-                  challengeId: challengeResponse.id,
-                  webauthn: {
-                    type: challengeResponse.webauthn.type,
-                    credential_response: data
-                  }
-                },
-                error: null
-              };
-            }
-            return {
-              data: null,
-              error
-            };
-          }
-          case "request": {
-            const options = mergeCredentialRequestOptions(challengeResponse.webauthn.credential_options.publicKey, overrides === null || overrides === void 0 ? void 0 : overrides.request);
-            const {
-              data,
-              error
-            } = yield getCredential(Object.assign(Object.assign({}, challengeResponse.webauthn.credential_options), {
-              publicKey: options,
-              signal: abortSignal
-            }));
-            if (data) {
-              return {
-                data: {
-                  factorId,
-                  challengeId: challengeResponse.id,
-                  webauthn: {
-                    type: challengeResponse.webauthn.type,
-                    credential_response: data
-                  }
-                },
-                error: null
-              };
-            }
-            return {
-              data: null,
-              error
-            };
-          }
-        }
-      } catch (error) {
-        if (isAuthError(error)) {
-          return {
-            data: null,
-            error
-          };
-        }
-        return {
-          data: null,
-          error: new AuthUnknownError("Unexpected error in challenge", error)
-        };
-      }
-    });
-  }
-  /**
-   * Verify a WebAuthn credential with the server.
-   * Completes the WebAuthn ceremony by sending the credential to the server for verification.
-   *
-   * @experimental This method is experimental and may change in future releases
-   * @param {Object} params - Verification parameters
-   * @param {string} params.challengeId - ID of the challenge being verified
-   * @param {string} params.factorId - ID of the WebAuthn factor
-   * @param {MFAVerifyWebauthnParams<T>['webauthn']} params.webauthn - WebAuthn credential response
-   * @returns {Promise<AuthMFAVerifyResponse>} Verification result with session or error
-   * @see {@link https://w3c.github.io/webauthn/#sctn-verifying-assertion W3C WebAuthn Spec - Verifying an Authentication Assertion}
-   * */
-  _verify(_0) {
-    return __async(this, arguments, function* ({
-      challengeId,
-      factorId,
-      webauthn
-    }) {
-      return this.client.mfa.verify({
-        factorId,
-        challengeId,
-        webauthn
-      });
-    });
-  }
-  /**
-   * Complete WebAuthn authentication flow.
-   * Performs challenge and verification in a single operation for existing credentials.
-   *
-   * @experimental This method is experimental and may change in future releases
-   * @param {Object} params - Authentication parameters
-   * @param {string} params.factorId - ID of the WebAuthn factor to authenticate with
-   * @param {Object} params.webauthn - WebAuthn configuration
-   * @param {string} params.webauthn.rpId - Relying Party ID (defaults to current hostname)
-   * @param {string[]} params.webauthn.rpOrigins - Allowed origins (defaults to current origin)
-   * @param {AbortSignal} params.webauthn.signal - Optional abort signal
-   * @param {PublicKeyCredentialRequestOptionsFuture} overrides - Override options for navigator.credentials.get
-   * @returns {Promise<RequestResult<AuthMFAVerifyResponseData, WebAuthnError | AuthError>>} Authentication result
-   * @see {@link https://w3c.github.io/webauthn/#sctn-authentication W3C WebAuthn Spec - Authentication Ceremony}
-   * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/PublicKeyCredentialRequestOptions MDN - PublicKeyCredentialRequestOptions}
-   */
-  _authenticate(_0, _1) {
-    return __async(this, arguments, function* ({
-      factorId,
-      webauthn: {
-        rpId = typeof window !== "undefined" ? window.location.hostname : void 0,
-        rpOrigins = typeof window !== "undefined" ? [window.location.origin] : void 0,
-        signal
-      }
-    }, overrides) {
-      if (!rpId) {
-        return {
-          data: null,
-          error: new AuthError("rpId is required for WebAuthn authentication")
-        };
-      }
-      try {
-        if (!browserSupportsWebAuthn()) {
-          return {
-            data: null,
-            error: new AuthUnknownError("Browser does not support WebAuthn", null)
-          };
-        }
-        const {
-          data: challengeResponse,
-          error: challengeError
-        } = yield this.challenge({
-          factorId,
-          webauthn: {
-            rpId,
-            rpOrigins
-          },
-          signal
-        }, {
-          request: overrides
-        });
-        if (!challengeResponse) {
-          return {
-            data: null,
-            error: challengeError
-          };
-        }
-        const {
-          webauthn
-        } = challengeResponse;
-        return this._verify({
-          factorId,
-          challengeId: challengeResponse.challengeId,
-          webauthn: {
-            type: webauthn.type,
-            rpId,
-            rpOrigins,
-            credential_response: webauthn.credential_response
-          }
-        });
-      } catch (error) {
-        if (isAuthError(error)) {
-          return {
-            data: null,
-            error
-          };
-        }
-        return {
-          data: null,
-          error: new AuthUnknownError("Unexpected error in authenticate", error)
-        };
-      }
-    });
-  }
-  /**
-   * Complete WebAuthn registration flow.
-   * Performs enrollment, challenge, and verification in a single operation for new credentials.
-   *
-   * @experimental This method is experimental and may change in future releases
-   * @param {Object} params - Registration parameters
-   * @param {string} params.friendlyName - User-friendly name for the credential
-   * @param {string} params.rpId - Relying Party ID (defaults to current hostname)
-   * @param {string[]} params.rpOrigins - Allowed origins (defaults to current origin)
-   * @param {AbortSignal} params.signal - Optional abort signal
-   * @param {PublicKeyCredentialCreationOptionsFuture} overrides - Override options for navigator.credentials.create
-   * @returns {Promise<RequestResult<AuthMFAVerifyResponseData, WebAuthnError | AuthError>>} Registration result
-   * @see {@link https://w3c.github.io/webauthn/#sctn-registering-a-new-credential W3C WebAuthn Spec - Registration Ceremony}
-   * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/PublicKeyCredentialCreationOptions MDN - PublicKeyCredentialCreationOptions}
-   */
-  _register(_0, _1) {
-    return __async(this, arguments, function* ({
-      friendlyName,
-      rpId = typeof window !== "undefined" ? window.location.hostname : void 0,
-      rpOrigins = typeof window !== "undefined" ? [window.location.origin] : void 0,
-      signal
-    }, overrides) {
-      if (!rpId) {
-        return {
-          data: null,
-          error: new AuthError("rpId is required for WebAuthn registration")
-        };
-      }
-      try {
-        if (!browserSupportsWebAuthn()) {
-          return {
-            data: null,
-            error: new AuthUnknownError("Browser does not support WebAuthn", null)
-          };
-        }
-        const {
-          data: factor,
-          error: enrollError
-        } = yield this._enroll({
-          friendlyName
-        });
-        if (!factor) {
-          yield this.client.mfa.listFactors().then((factors) => {
-            var _a;
-            return (_a = factors.data) === null || _a === void 0 ? void 0 : _a.all.find((v) => v.factor_type === "webauthn" && v.friendly_name === friendlyName && v.status !== "unverified");
-          }).then((factor2) => factor2 ? this.client.mfa.unenroll({
-            factorId: factor2 === null || factor2 === void 0 ? void 0 : factor2.id
-          }) : void 0);
-          return {
-            data: null,
-            error: enrollError
-          };
-        }
-        const {
-          data: challengeResponse,
-          error: challengeError
-        } = yield this._challenge({
-          factorId: factor.id,
-          friendlyName: factor.friendly_name,
-          webauthn: {
-            rpId,
-            rpOrigins
-          },
-          signal
-        }, {
-          create: overrides
-        });
-        if (!challengeResponse) {
-          return {
-            data: null,
-            error: challengeError
-          };
-        }
-        return this._verify({
-          factorId: factor.id,
-          challengeId: challengeResponse.challengeId,
-          webauthn: {
-            rpId,
-            rpOrigins,
-            type: challengeResponse.webauthn.type,
-            credential_response: challengeResponse.webauthn.credential_response
-          }
-        });
-      } catch (error) {
-        if (isAuthError(error)) {
-          return {
-            data: null,
-            error
-          };
-        }
-        return {
-          data: null,
-          error: new AuthUnknownError("Unexpected error in register", error)
-        };
-      }
-    });
-  }
-};
-
 // node_modules/@supabase/auth-js/dist/module/GoTrueClient.js
 polyfillGlobalThis();
 var DEFAULT_OPTIONS = {
@@ -7258,29 +6253,6 @@ function lockNoOp(name, acquireTimeout, fn) {
 }
 var GLOBAL_JWKS = {};
 var GoTrueClient = class _GoTrueClient {
-  /**
-   * The JWKS used for verifying asymmetric JWTs
-   */
-  get jwks() {
-    var _a, _b;
-    return (_b = (_a = GLOBAL_JWKS[this.storageKey]) === null || _a === void 0 ? void 0 : _a.jwks) !== null && _b !== void 0 ? _b : {
-      keys: []
-    };
-  }
-  set jwks(value) {
-    GLOBAL_JWKS[this.storageKey] = Object.assign(Object.assign({}, GLOBAL_JWKS[this.storageKey]), {
-      jwks: value
-    });
-  }
-  get jwks_cached_at() {
-    var _a, _b;
-    return (_b = (_a = GLOBAL_JWKS[this.storageKey]) === null || _a === void 0 ? void 0 : _a.cachedAt) !== null && _b !== void 0 ? _b : Number.MIN_SAFE_INTEGER;
-  }
-  set jwks_cached_at(value) {
-    GLOBAL_JWKS[this.storageKey] = Object.assign(Object.assign({}, GLOBAL_JWKS[this.storageKey]), {
-      cachedAt: value
-    });
-  }
   /**
    * Create a new client for use in the browser.
    */
@@ -7345,8 +6317,7 @@ var GoTrueClient = class _GoTrueClient {
       challenge: this._challenge.bind(this),
       listFactors: this._listFactors.bind(this),
       challengeAndVerify: this._challengeAndVerify.bind(this),
-      getAuthenticatorAssuranceLevel: this._getAuthenticatorAssuranceLevel.bind(this),
-      webauthn: new WebAuthnApi(this)
+      getAuthenticatorAssuranceLevel: this._getAuthenticatorAssuranceLevel.bind(this)
     };
     if (this.persistSession) {
       if (settings.storage) {
@@ -7378,6 +6349,29 @@ var GoTrueClient = class _GoTrueClient {
       }));
     }
     this.initialize();
+  }
+  /**
+   * The JWKS used for verifying asymmetric JWTs
+   */
+  get jwks() {
+    var _a, _b;
+    return (_b = (_a = GLOBAL_JWKS[this.storageKey]) === null || _a === void 0 ? void 0 : _a.jwks) !== null && _b !== void 0 ? _b : {
+      keys: []
+    };
+  }
+  set jwks(value) {
+    GLOBAL_JWKS[this.storageKey] = Object.assign(Object.assign({}, GLOBAL_JWKS[this.storageKey]), {
+      jwks: value
+    });
+  }
+  get jwks_cached_at() {
+    var _a, _b;
+    return (_b = (_a = GLOBAL_JWKS[this.storageKey]) === null || _a === void 0 ? void 0 : _a.cachedAt) !== null && _b !== void 0 ? _b : Number.MIN_SAFE_INTEGER;
+  }
+  set jwks_cached_at(value) {
+    GLOBAL_JWKS[this.storageKey] = Object.assign(Object.assign({}, GLOBAL_JWKS[this.storageKey]), {
+      cachedAt: value
+    });
   }
   _debug(...args) {
     if (this.logDebugMessages) {
@@ -8641,7 +7635,7 @@ var GoTrueClient = class _GoTrueClient {
           };
         }
         const {
-          data: session,
+          session,
           error
         } = yield this._callRefreshToken(currentSession.refresh_token);
         if (error) {
@@ -8833,7 +7827,7 @@ var GoTrueClient = class _GoTrueClient {
         }
         if (hasExpired) {
           const {
-            data: refreshedSession,
+            session: refreshedSession,
             error
           } = yield this._callRefreshToken(currentSession.refresh_token);
           if (error) {
@@ -8928,7 +7922,7 @@ var GoTrueClient = class _GoTrueClient {
             throw new AuthSessionMissingError();
           }
           const {
-            data: session,
+            session,
             error
           } = yield this._callRefreshToken(currentSession.refresh_token);
           if (error) {
@@ -9155,6 +8149,10 @@ var GoTrueClient = class _GoTrueClient {
       }));
     });
   }
+  /**
+   * Receive a notification every time an auth event happens.
+   * @param callback A callback function to be invoked when an auth event happens.
+   */
   onAuthStateChange(callback) {
     const id = uuid();
     const subscription = {
@@ -9274,15 +8272,11 @@ var GoTrueClient = class _GoTrueClient {
       }
     });
   }
+  /**
+   * Links an oauth identity to an existing user.
+   * This method supports the PKCE flow.
+   */
   linkIdentity(credentials) {
-    return __async(this, null, function* () {
-      if ("token" in credentials) {
-        return this.linkIdentityIdToken(credentials);
-      }
-      return this.linkIdentityOAuth(credentials);
-    });
-  }
-  linkIdentityOAuth(credentials) {
     return __async(this, null, function* () {
       var _a;
       try {
@@ -9330,84 +8324,6 @@ var GoTrueClient = class _GoTrueClient {
         }
         throw error;
       }
-    });
-  }
-  linkIdentityIdToken(credentials) {
-    return __async(this, null, function* () {
-      return yield this._useSession((result) => __async(this, null, function* () {
-        var _a;
-        try {
-          const {
-            error: sessionError,
-            data: {
-              session
-            }
-          } = result;
-          if (sessionError) throw sessionError;
-          const {
-            options,
-            provider,
-            token,
-            access_token,
-            nonce
-          } = credentials;
-          const res = yield _request(this.fetch, "POST", `${this.url}/token?grant_type=id_token`, {
-            headers: this.headers,
-            jwt: (_a = session === null || session === void 0 ? void 0 : session.access_token) !== null && _a !== void 0 ? _a : void 0,
-            body: {
-              provider,
-              id_token: token,
-              access_token,
-              nonce,
-              link_identity: true,
-              gotrue_meta_security: {
-                captcha_token: options === null || options === void 0 ? void 0 : options.captchaToken
-              }
-            },
-            xform: _sessionResponse
-          });
-          const {
-            data,
-            error
-          } = res;
-          if (error) {
-            return {
-              data: {
-                user: null,
-                session: null
-              },
-              error
-            };
-          } else if (!data || !data.session || !data.user) {
-            return {
-              data: {
-                user: null,
-                session: null
-              },
-              error: new AuthInvalidTokenResponseError()
-            };
-          }
-          if (data.session) {
-            yield this._saveSession(data.session);
-            yield this._notifyAllSubscribers("USER_UPDATED", data.session);
-          }
-          return {
-            data,
-            error
-          };
-        } catch (error) {
-          if (isAuthError(error)) {
-            return {
-              data: {
-                user: null,
-                session: null
-              },
-              error
-            };
-          }
-          throw error;
-        }
-      }));
     });
   }
   /**
@@ -9615,7 +8531,7 @@ var GoTrueClient = class _GoTrueClient {
         yield this._saveSession(data.session);
         yield this._notifyAllSubscribers("TOKEN_REFRESHED", data.session);
         const result = {
-          data: data.session,
+          session: data.session,
           error: null
         };
         this.refreshingDeferred.resolve(result);
@@ -9624,7 +8540,7 @@ var GoTrueClient = class _GoTrueClient {
         this._debug(debugName, "error", error);
         if (isAuthError(error)) {
           const result = {
-            data: null,
+            session: null,
             error
           };
           if (!isAuthRetryableFetchError(error)) {
@@ -9986,9 +8902,9 @@ var GoTrueClient = class _GoTrueClient {
             factor_type: params.factorType
           }, params.factorType === "phone" ? {
             phone: params.phone
-          } : params.factorType === "totp" ? {
+          } : {
             issuer: params.issuer
-          } : {});
+          });
           const {
             data,
             error
@@ -10003,7 +8919,7 @@ var GoTrueClient = class _GoTrueClient {
               error
             };
           }
-          if (params.factorType === "totp" && data.type === "totp" && ((_b = data === null || data === void 0 ? void 0 : data.totp) === null || _b === void 0 ? void 0 : _b.qr_code)) {
+          if (params.factorType === "totp" && ((_b = data === null || data === void 0 ? void 0 : data.totp) === null || _b === void 0 ? void 0 : _b.qr_code)) {
             data.totp.qr_code = `data:image/svg+xml;utf-8,${data.totp.qr_code}`;
           }
           return {
@@ -10022,6 +8938,9 @@ var GoTrueClient = class _GoTrueClient {
       }
     });
   }
+  /**
+   * {@see GoTrueMFAApi#verify}
+   */
   _verify(params) {
     return __async(this, null, function* () {
       return this._acquireLock(-1, () => __async(this, null, function* () {
@@ -10038,20 +8957,14 @@ var GoTrueClient = class _GoTrueClient {
                 error: sessionError
               };
             }
-            const body = Object.assign({
-              challenge_id: params.challengeId
-            }, "webauthn" in params ? {
-              webauthn: Object.assign(Object.assign({}, params.webauthn), {
-                credential_response: params.webauthn.type === "create" ? serializeCredentialCreationResponse(params.webauthn.credential_response) : serializeCredentialRequestResponse(params.webauthn.credential_response)
-              })
-            } : {
-              code: params.code
-            });
             const {
               data,
               error
             } = yield _request(this.fetch, "POST", `${this.url}/factors/${params.factorId}/verify`, {
-              body,
+              body: {
+                code: params.code,
+                challenge_id: params.challengeId
+              },
               headers: this.headers,
               jwt: (_a = sessionData === null || sessionData === void 0 ? void 0 : sessionData.session) === null || _a === void 0 ? void 0 : _a.access_token
             });
@@ -10082,6 +8995,9 @@ var GoTrueClient = class _GoTrueClient {
       }));
     });
   }
+  /**
+   * {@see GoTrueMFAApi#challenge}
+   */
   _challenge(params) {
     return __async(this, null, function* () {
       return this._acquireLock(-1, () => __async(this, null, function* () {
@@ -10098,47 +9014,13 @@ var GoTrueClient = class _GoTrueClient {
                 error: sessionError
               };
             }
-            const response = yield _request(this.fetch, "POST", `${this.url}/factors/${params.factorId}/challenge`, {
-              body: params,
+            return yield _request(this.fetch, "POST", `${this.url}/factors/${params.factorId}/challenge`, {
+              body: {
+                channel: params.channel
+              },
               headers: this.headers,
               jwt: (_a = sessionData === null || sessionData === void 0 ? void 0 : sessionData.session) === null || _a === void 0 ? void 0 : _a.access_token
             });
-            if (response.error) {
-              return response;
-            }
-            const {
-              data
-            } = response;
-            if (data.type !== "webauthn") {
-              return {
-                data,
-                error: null
-              };
-            }
-            switch (data.webauthn.type) {
-              case "create":
-                return {
-                  data: Object.assign(Object.assign({}, data), {
-                    webauthn: Object.assign(Object.assign({}, data.webauthn), {
-                      credential_options: Object.assign(Object.assign({}, data.webauthn.credential_options), {
-                        publicKey: deserializeCredentialCreationOptions(data.webauthn.credential_options.publicKey)
-                      })
-                    })
-                  }),
-                  error: null
-                };
-              case "request":
-                return {
-                  data: Object.assign(Object.assign({}, data), {
-                    webauthn: Object.assign(Object.assign({}, data.webauthn), {
-                      credential_options: Object.assign(Object.assign({}, data.webauthn.credential_options), {
-                        publicKey: deserializeCredentialRequestOptions(data.webauthn.credential_options.publicKey)
-                      })
-                    })
-                  }),
-                  error: null
-                };
-            }
           }));
         } catch (error) {
           if (isAuthError(error)) {
@@ -10181,7 +9063,6 @@ var GoTrueClient = class _GoTrueClient {
    */
   _listFactors() {
     return __async(this, null, function* () {
-      var _a;
       const {
         data: {
           user
@@ -10194,21 +9075,15 @@ var GoTrueClient = class _GoTrueClient {
           error: userError
         };
       }
-      const data = {
-        all: [],
-        phone: [],
-        totp: [],
-        webauthn: []
-      };
-      for (const factor of (_a = user === null || user === void 0 ? void 0 : user.factors) !== null && _a !== void 0 ? _a : []) {
-        data.all.push(factor);
-        if (factor.status === "verified") {
-          ;
-          data[factor.factor_type].push(factor);
-        }
-      }
+      const factors = (user === null || user === void 0 ? void 0 : user.factors) || [];
+      const totp = factors.filter((factor) => factor.factor_type === "totp" && factor.status === "verified");
+      const phone = factors.filter((factor) => factor.factor_type === "phone" && factor.status === "verified");
       return {
-        data,
+        data: {
+          all: factors,
+          totp,
+          phone
+        },
         error: null
       };
     });
@@ -10393,14 +9268,13 @@ var GoTrueClient = class _GoTrueClient {
   }
 };
 GoTrueClient.nextInstanceID = 0;
-var GoTrueClient_default = GoTrueClient;
 
 // node_modules/@supabase/auth-js/dist/module/AuthAdminApi.js
 var AuthAdminApi = GoTrueAdminApi;
 var AuthAdminApi_default = AuthAdminApi;
 
 // node_modules/@supabase/auth-js/dist/module/AuthClient.js
-var AuthClient = GoTrueClient_default;
+var AuthClient = GoTrueClient;
 var AuthClient_default = AuthClient;
 
 // node_modules/@supabase/supabase-js/dist/module/lib/SupabaseAuthClient.js
@@ -10552,11 +9426,7 @@ var SupabaseClient = class {
    * `"estimated"`: Uses exact count for low numbers and planned count for high
    * numbers.
    */
-  rpc(fn, args = {}, options = {
-    head: false,
-    get: false,
-    count: void 0
-  }) {
+  rpc(fn, args = {}, options = {}) {
     return this.rest.rpc(fn, args, options);
   }
   /**
@@ -10593,8 +9463,8 @@ var SupabaseClient = class {
     return this.realtime.removeAllChannels();
   }
   _getAccessToken() {
+    var _a, _b;
     return __awaiter10(this, void 0, void 0, function* () {
-      var _a, _b;
       if (this.accessToken) {
         return yield this.accessToken();
       }
@@ -10645,7 +9515,7 @@ var SupabaseClient = class {
     }));
   }
   _listenForAuthEvents() {
-    const data = this.auth.onAuthStateChange((event, session) => {
+    let data = this.auth.onAuthStateChange((event, session) => {
       this._handleTokenChanged(event, "CLIENT", session === null || session === void 0 ? void 0 : session.access_token);
     });
     return data;
@@ -10708,7 +9578,7 @@ export {
   FunctionsHttpError,
   FunctionsRelayError,
   GoTrueAdminApi,
-  GoTrueClient_default as GoTrueClient,
+  GoTrueClient,
   NavigatorLockAcquireTimeoutError,
   PostgrestError,
   REALTIME_CHANNEL_STATES,

@@ -1,33 +1,466 @@
-<div class="main-wrapper">
-  <ng-container [ngSwitch]="mainView()">
-    
-    <app-dashboard *ngSwitchCase="'dashboard'"></app-dashboard>
+<!-- src/app/app.component.html -->
+<div class="min-h-screen bg-slate-50 font-sans antialiased">
 
-    <ng-container *ngSwitchDefault>
-      <header class="header-full-width">
-        <div class="header-content">
-          <div class="logo" (click)="goToLanding()">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>
-            <span>Clínica Monteluz</span>
-          </div>
-          <nav>
-            <button class="login-btn" (click)="onNavigateToAuth()">Iniciar Sesión / Registro</button>
-          </nav>
+  <!-- ========================================================== -->
+  <!-- MODAL DE CONFIRMACIÓN DE CITA (PARA PACIENTE Y MÉDICO)     -->
+  <!-- ========================================================== -->
+  @if(appointmentToConfirm(); as confirmation) {
+    <div class="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4" (click)="appointmentToConfirm.set(null)">
+      <div class="bg-white rounded-xl shadow-2xl p-8 max-w-sm w-full" (click)="$event.stopPropagation()">
+        <h3 class="text-2xl font-bold text-gray-800 text-center mb-4">Confirmar Cita</h3>
+        <div class="space-y-4 text-center">
+            <div>
+                <p class="text-sm text-gray-500">PACIENTE</p>
+                <p class="text-lg font-semibold text-blue-600">{{ confirmation.patientName }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500">MÉDICO</p>
+                <p class="text-lg font-semibold text-blue-600">{{ confirmation.doctorName }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500">FECHA Y HORA</p>
+                <p class="text-lg font-semibold text-blue-600">{{ confirmation.slot.display }}</p>
+            </div>
         </div>
-      </header>
+        <div class="mt-8 flex space-x-4">
+          <button (click)="appointmentToConfirm.set(null)" class="w-full bg-gray-200 text-gray-800 py-2 rounded-lg font-semibold hover:bg-gray-300">Cancelar</button>
+          <button (click)="bookAppointment()" [disabled]="loading()" class="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 disabled:bg-blue-300">{{ loading() ? 'Confirmando...' : 'Confirmar' }}</button>
+        </div>
+      </div>
+    </div>
+  }
 
-      <main class="content-area">
-        <app-landing *ngIf="!showAuth()" (navigateToAuth)="onNavigateToAuth()"></app-landing>
-        <app-auth *ngIf="showAuth()"></app-auth>
-      </main>
-    </ng-container>
+  
+  <!-- ========================================================== -->
+  <!-- MODAL DE CONFIRMACIÓN DE CITA (PARA PACIENTE Y MÉDICO)     -->
+  <!-- ========================================================== -->
+  @if(appointmentTicket(); as ticketID) {
+    <div class="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4" (click)="appointmentTicket.set(null)">
+      <div class="bg-white rounded-xl shadow-2xl p-8 max-w-lg w-full" (click)="$event.stopPropagation()">
+        <h3 class="text-2xl font-bold text-gray-800 text-center mb-4">Imprimir Ticket</h3>
+        <div class="space-y-4 text-center">
+            <iframe [frameBorder]="0" [src]="urlTicket" height="300" width="100%"></iframe>
+        </div>
+        <div class="mt-8 flex space-x-4">
+          <button (click)="appointmentTicket.set(null)" class="w-full bg-gray-200 text-gray-800 py-2 rounded-lg font-semibold hover:bg-gray-300">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  }
 
-  </ng-container>
+  <!-- ========================================================== -->
+  <!-- MODAL DE SEGUIMIENTO DEL MÉDICO (NUEVO)                    -->
+  <!-- ========================================================== -->
+  @if(followUpState(); as followUp) {
+    <div class="fixed inset-0 bg-black bg-opacity-60 z-40 flex items-center justify-center p-4" (click)="cancelFollowUp()">
+        <div class="bg-white rounded-xl shadow-2xl p-8 max-w-lg w-full" (click)="$event.stopPropagation()">
+            <h3 class="text-2xl font-bold text-gray-800 mb-2">Programar Seguimiento</h3>
+            <p class="text-gray-600 mb-6">Selecciona un horario disponible para: <span class="font-semibold text-blue-600">{{ followUp.patientName }}</span></p>
+
+            @if(loading()){
+              <p class="text-gray-500 text-sm animate-pulse h-48 flex items-center justify-center">Buscando horarios...</p>
+            } @else {
+              <div class="grid grid-cols-3 gap-2 max-h-64 overflow-y-auto p-2 bg-gray-100 rounded-md border">
+                  @for(slot of availableSlots(); track slot.value){
+                    <button type="button" (click)="selectedSlot.set(slot)" [ngClass]="{'bg-blue-600 text-white shadow-md': selectedSlot()?.value === slot.value, 'bg-gray-200 hover:bg-gray-300': selectedSlot()?.value !== slot.value}" class="p-2 text-sm rounded-lg text-center transition-colors duration-200">
+                      {{ slot.display }}
+                    </button>
+                  }
+                  @if(availableSlots().length === 0){
+                    <p class="text-gray-500 text-sm col-span-3 p-4 text-center">No tienes horarios disponibles en los próximos 7 días.</p>
+                  }
+              </div>
+            }
+            
+            <div class="mt-8 flex justify-end space-x-4">
+              <button (click)="cancelFollowUp()" class="bg-gray-200 text-gray-800 px-6 py-2 rounded-lg font-semibold hover:bg-gray-300">Cancelar</button>
+              @if(selectedSlot()){
+                <button (click)="prepareAppointmentConfirmation()" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700">Siguiente</button>
+              }
+            </div>
+        </div>
+    </div>
+  }
+
+  <!-- Header de Navegación -->
+  <header class="bg-white shadow-md sticky top-0 z-20">
+    <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+      <div class="text-2xl font-bold text-blue-600 flex items-center cursor-pointer" (click)="switchView('landing')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-8 w-8 mr-2"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>
+        <span>Clínica Monteluz</span>
+      </div>
+      <div>
+        @if (!session()) {
+          <button (click)="switchView('auth', 'login', 'patient')" class="text-gray-600 hover:text-blue-600 mr-4 font-medium">Iniciar Sesión</button>
+          <button (click)="switchView('auth', 'register', 'patient')" class="bg-blue-600 text-white px-5 py-2 rounded-full hover:bg-blue-700 transition duration-300 shadow-md">Registrarse</button>
+        } @else {
+          <span class="text-gray-700 mr-4">Hola, <span class="font-semibold">{{ userProfile()?.full_name }}</span></span>
+          <button (click)="handleLogout()" class="bg-red-500 text-white px-5 py-2 rounded-full hover:bg-red-600 transition duration-300 shadow-md">Cerrar Sesión</button>
+        }
+      </div>
+    </nav>
+  </header>
+
+  <!-- Contenido Principal -->
+  <main>
+    @switch (currentView()) {
+      @case ('landing') {
+        <section class="relative bg-white overflow-hidden"><div class="absolute inset-0 bg-gradient-to-r from-sky-100 to-blue-100 opacity-50"></div><div class="container relative mx-auto px-6 py-20 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center"><div class="text-center lg:text-left"><h1 class="text-5xl md:text-6xl font-extrabold text-gray-800 mb-4 leading-tight">Bienestar a tu alcance</h1><p class="text-xl text-gray-600 mb-8 max-w-lg mx-auto lg:mx-0">Encuentra al especialista que necesitas y agenda tu cita en minutos. Tu salud es nuestra prioridad.</p><button (click)="switchView('auth', 'login', 'patient')" class="bg-blue-600 text-white px-8 py-3 rounded-full text-lg font-semibold hover:bg-blue-700 transition duration-300 shadow-lg transform hover:scale-105">Reservar Cita Online</button></div><div class="flex justify-center"><img src="https://cdn.pixabay.com/photo/2021/01/11/01/59/blood-test-5906818_1280.jpg" alt="Doctora sonriendo a un paciente" class="rounded-2xl shadow-2xl w-full max-w-md"></div></div></section>
+        <section class="py-20 bg-sky-50"><div class="container mx-auto px-6 text-center"><h2 class="text-4xl font-bold text-gray-800 mb-12">Confianza y Profesionalismo a tu Servicio</h2><div class="grid grid-cols-1 md:grid-cols-3 gap-10"><div class="bg-white p-8 rounded-xl shadow-lg transform hover:-translate-y-2 transition-transform"><div class="bg-blue-600 text-white rounded-full h-16 w-16 flex items-center justify-center mx-auto mb-4 shadow-lg"><svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9V3m0 18a9 9 0 009-9m-9 9a9 9 0 00-9-9" /></svg></div><h3 class="text-xl font-semibold text-gray-800 mb-2">Tecnología Avanzada</h3><p class="text-gray-500">Equipos de última generación para diagnósticos precisos.</p></div><div class="bg-white p-8 rounded-xl shadow-lg transform hover:-translate-y-2 transition-transform"><div class="bg-blue-600 text-white rounded-full h-16 w-16 flex items-center justify-center mx-auto mb-4 shadow-lg"><svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg></div><h3 class="text-xl font-semibold text-gray-800 mb-2">Médicos Expertos</h3><p class="text-gray-500">Especialistas calificados y comprometidos con tu salud.</p></div><div class="bg-white p-8 rounded-xl shadow-lg transform hover:-translate-y-2 transition-transform"><div class="bg-blue-600 text-white rounded-full h-16 w-16 flex items-center justify-center mx-auto mb-4 shadow-lg"><svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div><h3 class="text-xl font-semibold text-gray-800 mb-2">Atención Personalizada</h3><p class="text-gray-500">Un trato cálido y humano centrado en tus necesidades.</p></div></div></div></section>
+        <section class="py-20 bg-white"><div class="container mx-auto px-6 text-center"><h2 class="text-4xl font-bold text-gray-800 mb-2">Nuestras Especialidades</h2><p class="text-gray-600 mb-12">Ofrecemos una amplia gama de especialidades para cuidar de ti y tu familia.</p><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"><div class="bg-white rounded-xl shadow-lg overflow-hidden transform hover:scale-105 transition-transform duration-300"><img src="https://images.pexels.com/photos/5207102/pexels-photo-5207102.jpeg" alt="Cardiología" class="w-full h-48 object-cover"><div class="p-6"><h3 class="text-xl font-semibold text-gray-800">Cardiología</h3></div></div><div class="bg-white rounded-xl shadow-lg overflow-hidden transform hover:scale-105 transition-transform duration-300"><img src="https://images.pexels.com/photos/5927811/pexels-photo-5927811.jpeg" alt="Dermatología" class="w-full h-48 object-cover"><div class="p-6"><h3 class="text-xl font-semibold text-gray-800">Dermatología</h3></div></div><div class="bg-white rounded-xl shadow-lg overflow-hidden transform hover:scale-105 transition-transform duration-300"><img src="https://images.pexels.com/photos/7446997/pexels-photo-7446997.jpeg" alt="Pediatría" class="w-full h-48 object-cover"><div class="p-6"><h3 class="text-xl font-semibold text-gray-800">Pediatría</h3></div></div><div class="bg-white rounded-xl shadow-lg overflow-hidden transform hover:scale-105 transition-transform duration-300"><img src="https://images.pexels.com/photos/7089015/pexels-photo-7089015.jpeg" alt="Ginecología" class="w-full h-48 object-cover"><div class="p-6"><h3 class="text-xl font-semibold text-gray-800">Ginecología</h3></div></div><div class="bg-white rounded-xl shadow-lg overflow-hidden transform hover:scale-105 transition-transform duration-300"><img src="https://images.pexels.com/photos/5752289/pexels-photo-5752289.jpeg" alt="Oftalmología" class="w-full h-48 object-cover"><div class="p-6"><h3 class="text-xl font-semibold text-gray-800">Oftalmología</h3></div></div><div class="bg-white rounded-xl shadow-lg overflow-hidden transform hover:scale-105 transition-transform duration-300"><img src="https://images.pexels.com/photos/5215000/pexels-photo-5215000.jpeg" alt="Medicina General" class="w-full h-48 object-cover"><div class="p-6"><h3 class="text-xl font-semibold text-gray-800">Medicina General</h3></div></div></div></div></section>
+        <section class="py-20 bg-sky-50"><div class="container mx-auto px-6 text-center"><h2 class="text-4xl font-bold text-gray-800 mb-12">Lo que dicen nuestros pacientes</h2><div class="grid grid-cols-1 lg:grid-cols-3 gap-8"><div class="bg-white p-8 rounded-xl shadow-lg"><img src="https://placehold.co/100x100/e0f2fe/3b82f6?text=AG" alt="Avatar Ana García" class="w-20 h-20 rounded-full mx-auto -mt-16 mb-4 border-4 border-white"><p class="text-gray-600 italic mb-4">"El trato fue excepcional y el doctor se tomó todo el tiempo necesario para explicarme mi diagnóstico."</p><p class="font-semibold text-blue-600">- Ana García</p></div><div class="bg-white p-8 rounded-xl shadow-lg"><img src="https://placehold.co/100x100/e0f2fe/3b82f6?text=CM" alt="Avatar Carlos Martinez" class="w-20 h-20 rounded-full mx-auto -mt-16 mb-4 border-4 border-white"><p class="text-gray-600 italic mb-4">"Poder agendar la cita por internet me ahorró muchísimo tiempo. El sistema es muy fácil de usar."</p><p class="font-semibold text-blue-600">- Carlos Martinez</p></div><div class="bg-white p-8 rounded-xl shadow-lg"><img src="https://placehold.co/100x100/e0f2fe/3b82f6?text=SL" alt="Avatar Sofía López" class="w-20 h-20 rounded-full mx-auto -mt-16 mb-4 border-4 border-white"><p class="text-gray-600 italic mb-4">"Llevé a mi hijo a pediatría y la doctora fue increíble con él. Un ambiente muy amigable para los niños."</p><p class="font-semibold text-blue-600">- Sofía López</p></div></div></div></section>
+        <footer class="bg-slate-800 text-white py-8"><div class="container mx-auto px-6 text-center"><p>&copy; 2025 Clínica Monteluz. Todos los derechos reservados.</p></div></footer>
+      }
+      @case ('auth') {
+        <div class="container mx-auto px-6 py-12">
+          @if(authForm; as form){
+            <div class="max-w-md mx-auto bg-white p-8 rounded-xl shadow-lg">
+              <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">{{ authMode() === 'login' ? 'Iniciar Sesión' : 'Crear Cuenta' }}</h2>
+              <form [formGroup]="form" (ngSubmit)="handleAuth()">
+                @if (authMode() === 'register') {
+                  <div class="mb-4">
+                    <label for="fullName" class="block text-gray-700 font-medium mb-2">Nombre Completo</label>
+                    <input type="text" id="fullName" formControlName="fullName" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  </div>
+                }
+                <div class="mb-4">
+                  <label for="email" class="block text-gray-700 font-medium mb-2">Correo Electrónico</label>
+                  <input type="email" id="email" formControlName="email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="mb-6">
+                  <label for="password" class="block text-gray-700 font-medium mb-2">Contraseña</label>
+                  <input type="password" id="password" formControlName="password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                @if (authMode() === 'register' && userType() === 'doctor') {
+                  <div class="mb-4">
+                    <label for="specialty" class="block text-gray-700 font-medium mb-2">Especialidad</label>
+                    <select id="specialty" formControlName="specialty_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                      @for(spec of specialties(); track spec.id) {
+                        <option [value]="spec.id">{{ spec.name }}</option>
+                      }
+                    </select>
+                  </div>
+                  <div class="mb-4">
+                    <label for="license_number" class="block text-gray-700 font-medium mb-2">Número de Licencia Médica</label>
+                    <input type="text" id="license_number" formControlName="license_number" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ej: 123456">
+                  </div>
+                }
+                <button type="submit" [disabled]="form.invalid || loading()" class="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition duration-300 disabled:bg-blue-300">
+                  {{ loading() ? 'Procesando...' : (authMode() === 'login' ? 'Ingresar' : 'Registrar') }}
+                </button>
+              </form>
+              <p class="text-center text-gray-600 mt-4">
+                @if (authMode() === 'login') {
+                  <span>¿No tienes cuenta?</span>
+                  <a href="#" (click)="switchView('auth', 'register', userType()); $event.preventDefault()" class="text-blue-600 hover:underline"> Regístrate</a>
+                } @else {
+                  <span>¿Ya tienes cuenta?</span>
+                  <a href="#" (click)="switchView('auth', 'login', userType()); $event.preventDefault()" class="text-blue-600 hover:underline"> Inicia Sesión</a>
+                }
+              </p>
+                <div class="mt-6 flex justify-center border-t pt-4">
+                  <button (click)="setUserType('patient')" [class.bg-blue-600]="userType() === 'patient'" [class.text-white]="userType() === 'patient'" class="px-4 py-2 rounded-l-lg border">Soy Paciente</button>
+                  <button (click)="setUserType('doctor')" [class.bg-blue-600]="userType() === 'doctor'" [class.text-white]="userType() === 'doctor'" class="px-4 py-2 rounded-r-lg border">Soy Médico</button>
+                </div>
+            </div>
+          }
+        </div>
+      }
+      @case ('dashboard') {
+        <div class="container mx-auto px-6 py-12">
+            <h2 class="text-4xl font-bold text-gray-800 mb-8">Mi Panel</h2>
+            <div class="bg-white p-6 rounded-xl shadow-lg">
+              <div class="border-b border-gray-200 mb-6">
+                <nav class="-mb-px flex space-x-6 overflow-x-auto">
+                  @if(userProfile()?.role === 'patient') {
+                    <button (click)="switchDashboardTab('upcoming')" [ngClass]="{'border-blue-500 text-blue-600': dashboardTab() === 'upcoming'}" class="whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-lg">Próximas Citas</button>
+                    <button (click)="switchDashboardTab('past')" [ngClass]="{'border-blue-500 text-blue-600': dashboardTab() === 'past'}" class="whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-lg">Historial</button>
+                  } @else {
+                    <button (click)="switchDashboardTab('office')" [ngClass]="{'border-blue-500 text-blue-600': dashboardTab() === 'office'}" class="whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-lg">Mi Consultorio</button>
+                    <button (click)="switchDashboardTab('upcoming')" [ngClass]="{'border-blue-500 text-blue-600': dashboardTab() === 'upcoming'}" class="whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-lg">Citas Agendadas</button>
+                    <button (click)="switchDashboardTab('past')" [ngClass]="{'border-blue-500 text-blue-600': dashboardTab() === 'past'}" class="whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-lg">Historial de Pacientes</button>
+                  }
+                  <button (click)="switchDashboardTab('profile')" [ngClass]="{'border-blue-500 text-blue-600': dashboardTab() === 'profile'}" class="whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-lg">Mi Perfil</button>
+                </nav>
+              </div>
+
+              @if(userProfile()?.role === 'patient') {
+                @switch(dashboardTab()) {
+                  @case('upcoming') {
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                      <div class="md:col-span-1">
+                        <h3 class="text-2xl font-semibold mb-4">Reservar Nueva Cita</h3>
+                        <div class="space-y-4 p-4 border rounded-lg bg-gray-50">
+                          <div>
+                            <label class="block text-gray-700 font-medium">1. Especialidad</label>
+                            <select #specSelect id="specSelect" (change)="loadDoctorsBySpecialty(specSelect.value); selectedDoctorId.set(null)" class="w-full mt-2 px-4 py-2 border border-gray-300 rounded-lg">
+                              <option value="">Todas</option>
+                              @for(spec of specialties(); track spec.id){ <option [value]="spec.id">{{ spec.name }}</option> }
+                            </select>
+                          </div>
+                          <div>
+                            <label class="block text-gray-700 font-medium">2. Médico</label>
+                            <select #docSelect id="docSelect" (change)="selectedDoctorId.set(docSelect.value)" class="w-full mt-2 px-4 py-2 border border-gray-300 rounded-lg">
+                              <option value="">Seleccione...</option>
+                              @for(doc of availableDoctors(); track doc.id){ <option [value]="doc.id">{{ doc.full_name }}</option> }
+                            </select>
+                          </div>
+                          @if(selectedDoctorId()){
+                            <div>
+                              <label class="block text-gray-700 font-medium mb-2">3. Horarios Disponibles</label>
+                              @if(loading()){
+                                <p class="text-gray-500 text-sm animate-pulse">Buscando horarios...</p>
+                              } @else {
+                                <div class="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto p-1 bg-white rounded-md border">
+                                    @for(slot of availableSlots(); track slot.value){
+                                      <button type="button" (click)="selectedSlot.set(slot)" [ngClass]="{'bg-blue-600 text-white shadow-md': selectedSlot()?.value === slot.value, 'bg-gray-100 hover:bg-gray-200': selectedSlot()?.value !== slot.value}" class="p-2 text-sm rounded-lg text-center transition-colors duration-200">
+                                        {{ slot.display }}
+                                      </button>
+                                    }
+                                    @if(availableSlots().length === 0){
+                                      <p class="text-gray-500 text-sm col-span-2 p-4 text-center">No hay horarios disponibles.</p>
+                                    }
+                                </div>
+                              }
+                            </div>
+                            @if(selectedSlot()){
+                              <button (click)="prepareAppointmentConfirmation()" [disabled]="loading()" class="w-full mt-4 bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition duration-300 disabled:bg-blue-300">
+                                Reservar Horario
+                              </button>
+                            }
+                          }
+                        </div>
+                      </div>
+                      <div class="md:col-span-2">
+                          <div class="grid grid-cols-1 md:grid-cols-3">
+                            <div class="md:col-span-2">
+                              <h3 class="text-2xl font-semibold mb-4">Mis Próximas Citas</h3>
+                            </div>
+                            <div class="md:col-span-1 text-right">
+                              <button (click)="downloadAppointments(userProfile()!.id)" class="text-sm bg-green-100 text-green-700 px-3 mx-3 py-1 rounded-full hover:bg-green-200">Descargar citas</button>
+                            </div>
+                          </div>
+                          <div class="space-y-4">
+                            @if(upcomingAppointments().length > 0){
+                              @for(apt of upcomingAppointments(); track apt.id){
+                                <div class="p-4 border rounded-lg flex justify-between items-center bg-blue-50">
+                                  <div>
+                                    <p class="font-bold text-lg">Dr. {{ apt.doctor?.full_name }}</p>
+                                    <p class="text-gray-600">{{ apt.appointment_time | date:'fullDate' }} a las {{ apt.appointment_time | date:'shortTime' }}</p>
+                                  </div>
+                                  <div>
+                                    <button (click)="printTicket(apt.id!)" class="text-sm bg-green-100 text-green-700 px-3 mx-3 py-1 rounded-full hover:bg-green-200">Ticket</button>
+                                    <button (click)="updateAppointmentStatus(apt.id!, 'canceled')" class="text-sm bg-red-100 text-red-700 px-3 mx-3 py-1 rounded-full hover:bg-red-200">Cancelar</button>
+                                  </div>
+                                </div>
+                              }
+                            } @else {
+                              <p class="text-gray-500">No tienes citas programadas.</p>
+                            }
+                          </div>
+                      </div>
+                    </div>
+                  }
+                  @case('past') {
+                    <h3 class="text-2xl font-semibold mb-4">Historial de Citas</h3>
+                    <div class="space-y-4">
+                      @if(pastAppointments().length > 0){
+                        @for(apt of pastAppointments(); track apt.id){
+                          <div class="p-4 border rounded-lg bg-gray-50">
+                            <div class="flex justify-between items-start">
+                              <div>
+                                <p class="font-bold text-lg">Dr. {{ apt.doctor?.full_name }}</p>
+                                <p class="text-gray-600">{{ apt.appointment_time | date:'fullDate' }}</p>
+                              </div>
+                              <span class="px-3 py-1 text-sm font-medium rounded-full" [ngClass]="{'bg-green-100 text-green-800': apt.status === 'completed', 'bg-red-100 text-red-800': apt.status === 'canceled', 'bg-gray-100 text-gray-800': apt.status === 'scheduled'}">
+                                {{ apt.status | titlecase }}
+                              </span>
+                            </div>
+                            @if(apt.status === 'completed') {
+                              <div class="mt-4 pt-4 border-t">
+                                @if(apt.rating) {
+                                  <h4 class="font-semibold text-gray-700">Tu Reseña:</h4>
+                                  <div class="flex items-center my-1">
+                                    @for (star of [1,2,3,4,5]; track star) {
+                                      <svg aria-hidden="true" class="w-5 h-5" [class.text-yellow-400]="star <= apt.rating" [class.text-gray-300]="star > apt.rating" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                                    }
+                                  </div>
+                                  @if(apt.feedback){<p class="text-gray-600 italic">"{{ apt.feedback }}"</p>}
+                                } @else {
+                                  <h4 class="font-semibold text-gray-700 mb-2">Deja tu reseña:</h4>
+                                  <div class="flex flex-col space-y-2">
+                                    <select #ratingSelect class="border rounded-lg px-2 py-1 max-w-xs"><option value="">Calificación...</option><option value="5">⭐⭐⭐⭐⭐</option><option value="4">⭐⭐⭐⭐</option><option value="3">⭐⭐⭐</option><option value="2">⭐⭐</option><option value="1">⭐</option></select>
+                                    <textarea #feedbackInput placeholder="Escribe tu comentario..." rows="2" class="border rounded-lg p-2"></textarea>
+                                    <button (click)="submitFeedback(apt.id!, ratingSelect.value, feedbackInput.value)" class="bg-indigo-500 text-white px-3 py-1 rounded-lg text-sm self-start hover:bg-indigo-600">Enviar</button>
+                                  </div>
+                                }
+                              </div>
+                              @if(apt.diagnosis) {
+                                <div class="mt-4 pt-4 border-t">
+                                  <h4 class="font-semibold text-gray-700">Diagnóstico del Médico:</h4>
+                                  <p class="text-gray-800 mt-1 whitespace-pre-wrap bg-blue-50 p-3 rounded-md">{{ apt.diagnosis }}</p>
+                                </div>
+                              }
+                            }
+                          </div>
+                        }
+                      } @else {
+                        <p class="text-gray-500">No tienes citas en tu historial.</p>
+                      }
+                    </div>
+                  }
+                  @case('profile') {
+                    <h3 class="text-2xl font-semibold mb-4">Mi Perfil</h3>
+                    <div class="max-w-lg">
+                      @if(profileForm) {
+                        <form [formGroup]="profileForm" (ngSubmit)="handleProfileUpdate()" class="space-y-4">
+                          <div><label for="profileEmail" class="block text-gray-700 font-medium mb-2">Correo Electrónico</label><input type="email" id="profileEmail" [value]="userProfile()?.email" readonly class="w-full px-4 py-2 border bg-gray-100 border-gray-300 rounded-lg"></div>
+                          <div><label for="profileFullName" class="block text-gray-700 font-medium mb-2">Nombre Completo</label><input type="text" id="profileFullName" formControlName="fullName" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"></div>
+                          <button type="submit" [disabled]="profileForm.invalid || loading()" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition duration-300 disabled:bg-blue-300">{{ loading() ? 'Guardando...' : 'Guardar Cambios' }}</button>
+                        </form>
+                      }
+                    </div>
+                  }
+                }
+              }
+
+              @if(userProfile()?.role === 'doctor') {
+                @switch(dashboardTab()) {
+                  @case('office') {
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                      <div class="md:col-span-1">
+                        <h3 class="text-2xl font-semibold mb-4">Gestionar mi Horario</h3>
+                        <div class="space-y-4 p-4 border rounded-lg bg-gray-50">
+                          <div><label class="block text-gray-700 font-medium">Día</label><select #daySelect class="w-full mt-2 px-4 py-2 border border-gray-300 rounded-lg"><option value="1">Lunes</option><option value="2">Martes</option><option value="3">Miércoles</option><option value="4">Jueves</option><option value="5">Viernes</option><option value="6">Sábado</option><option value="0">Domingo</option></select></div>
+                          <div><label class="block text-gray-700 font-medium">Hora de inicio</label><input type="time" #startTimeInput class="w-full mt-2 px-4 py-2 border border-gray-300 rounded-lg"></div>
+                          <div><label class="block text-gray-700 font-medium">Hora de fin</label><input type="time" #endTimeInput class="w-full mt-2 px-4 py-2 border border-gray-300 rounded-lg"></div>
+                          <button (click)="addSchedule(daySelect.value, startTimeInput.value, endTimeInput.value)" [disabled]="loading()" class="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition duration-300 disabled:bg-blue-300">{{ loading() ? 'Añadiendo...' : 'Añadir Horario' }}</button>
+                        </div>
+                      </div>
+                      <div class="md:col-span-2">
+                        <h3 class="text-2xl font-semibold mb-4">Mi Horario Actual</h3>
+                        <div class="space-y-2">
+                          @if(mySchedule().length > 0){
+                            @for(sch of mySchedule(); track sch.id){
+                              <div class="p-3 border rounded-lg flex justify-between items-center text-sm bg-white">
+                                <span>{{ getDayName(sch.day_of_week) }}: {{ sch.start_time }} - {{ sch.end_time }}</span>
+                                <button (click)="deleteSchedule(sch.id!)" class="text-red-500 hover:text-red-700 font-bold text-xl leading-none">&times;</button>
+                              </div>
+                            }
+                          } @else {
+                            <p class="text-gray-500 text-sm">Aún no has definido tu horario.</p>
+                          }
+                        </div>
+                      </div>
+                    </div>
+                  }
+                  @case('upcoming') {
+                    <h3 class="text-2xl font-semibold mb-4">Mis Citas Agendadas</h3>
+                    <div class="space-y-4">
+                      @if(upcomingAppointments().length > 0){
+                        @for(apt of upcomingAppointments(); track apt.id){
+                          <div class="p-4 border rounded-lg flex justify-between items-center bg-blue-50">
+                            <div>
+                              <p class="font-bold text-lg">{{ apt.patient?.full_name }}</p>
+                              <p class="text-gray-600">{{ apt.appointment_time | date:'fullDate' }} a las {{ apt.appointment_time | date:'shortTime' }}</p>
+                            </div>
+                            <div class="flex space-x-2">
+                              <button (click)="updateAppointmentStatus(apt.id!, 'completed')" class="text-sm bg-green-100 text-green-700 px-3 py-1 rounded-full hover:bg-green-200">Completar</button>
+                              <button (click)="updateAppointmentStatus(apt.id!, 'canceled')" class="text-sm bg-red-100 text-red-700 px-3 py-1 rounded-full hover:bg-red-200">Cancelar</button>
+                            </div>
+                          </div>
+                        }
+                      } @else {
+                        <p class="text-gray-500">No tienes citas programadas.</p>
+                      }
+                    </div>
+                  }
+                  @case('past') {
+                    <h3 class="text-2xl font-semibold mb-4">Historial de Pacientes</h3>
+                    <div class="space-y-4">
+                      @if(pastAppointments().length > 0){
+                        @for(apt of pastAppointments(); track apt.id){
+                          <div class="p-4 border rounded-lg bg-gray-50">
+                            <div class="flex justify-between items-start">
+                              <div>
+                                <p class="font-bold text-lg">{{ apt.patient?.full_name }}</p>
+                                <p class="text-gray-600">{{ apt.appointment_time | date:'fullDate' }}</p>
+                              </div>
+                              <span class="px-3 py-1 text-sm font-medium rounded-full" [ngClass]="{'bg-green-100 text-green-800': apt.status === 'completed', 'bg-red-100 text-red-800': apt.status === 'canceled', 'bg-gray-100 text-gray-800': apt.status === 'scheduled'}">
+                                {{ apt.status | titlecase }}
+                              </span>
+                            </div>
+                            @if(apt.status === 'completed') {
+                              @if(apt.rating) {
+                                <div class="mt-4 pt-4 border-t">
+                                  <h4 class="font-semibold text-gray-700">Reseña del Paciente:</h4>
+                                  <div class="flex items-center my-1">
+                                    @for (star of [1,2,3,4,5]; track star) { <svg aria-hidden="true" class="w-5 h-5" [class.text-yellow-400]="star <= apt.rating" [class.text-gray-300]="star > apt.rating" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg> }
+                                  </div>
+                                  @if(apt.feedback){<p class="text-gray-600 italic">"{{ apt.feedback }}"</p>}
+                                </div>
+                              }
+                              <div class="mt-4 pt-4 border-t">
+                                <h4 class="font-semibold text-gray-700 mb-2">Diagnóstico de la Cita</h4>
+                                @if(apt.diagnosis) {
+                                  <p class="text-gray-800 bg-white p-3 rounded-md whitespace-pre-wrap">{{ apt.diagnosis }}</p>
+                                } @else {
+                                  <div class="flex flex-col space-y-2">
+                                    <textarea #diagnosisInput placeholder="Ingrese el diagnóstico, tratamiento y notas..." rows="3" class="w-full border rounded-lg p-2"></textarea>
+                                    <button (click)="submitDiagnosis(apt.id!, diagnosisInput.value)" class="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm self-start hover:bg-blue-600">
+                                      Guardar Diagnóstico
+                                    </button>
+                                  </div>
+                                }
+                              </div>
+                              <div class="mt-4 pt-4 border-t flex justify-end">
+                                <button (click)="startFollowUp(apt)" class="bg-teal-500 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-teal-600 transition-colors">
+                                  Programar Seguimiento
+                                </button>
+                              </div>
+                            }
+                          </div>
+                        }
+                      } @else {
+                        <p class="text-gray-500">No tienes citas en tu historial.</p>
+                      }
+                    </div>
+                  }
+                  @case('profile') {
+                    <h3 class="text-2xl font-semibold mb-4">Mi Perfil</h3>
+                    <div class="max-w-lg">
+                      @if(profileForm) {
+                        <form [formGroup]="profileForm" (ngSubmit)="handleProfileUpdate()" class="space-y-4">
+                          <div><label for="profileEmail" class="block text-gray-700 font-medium mb-2">Correo Electrónico</label><input type="email" id="profileEmail" [value]="userProfile()?.email" readonly class="w-full px-4 py-2 border bg-gray-100 border-gray-300 rounded-lg"></div>
+                          <div><label for="profileFullName" class="block text-gray-700 font-medium mb-2">Nombre Completo</label><input type="text" id="profileFullName" formControlName="fullName" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"></div>
+                          @if(userProfile()?.role === 'doctor') {
+                            <div>
+                              <label for="profileLicenseNumber" class="block text-gray-700 font-medium mb-2">Número de Licencia</label>
+                              <input type="text" id="profileLicenseNumber" formControlName="license_number" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                          }
+                          <button type="submit" [disabled]="profileForm.invalid || loading()" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition duration-300 disabled:bg-blue-300">{{ loading() ? 'Guardando...' : 'Guardar Cambios' }}</button>
+                        </form>
+                      }
+                      @if(userProfile()?.role === 'doctor') {
+                        <div class="mt-8 pt-6 border-t">
+                          <h4 class="text-xl font-semibold mb-2">Mis Estadísticas</h4>
+                          <div class="bg-indigo-50 p-4 rounded-lg flex items-center space-x-4">
+                            <div class="text-yellow-500"><svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg></div>
+                            <div>
+                              <p class="text-gray-600 font-medium">Calificación Promedio</p>
+                              <p class="text-3xl font-bold text-indigo-800">{{ doctorAverageRating() }} / 5</p>
+                            </div>
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  }
+                }
+              }
+            </div>
+        </div>
+      }
+    }
+  </main>
 </div>
-
-<app-loading></app-loading>
-<app-notification></app-notification>
-<app-prescription-modal></app-prescription-modal>
-<app-confirmation-modal></app-confirmation-modal>
-<app-notification-toast></app-notification-toast>
-<router-outlet></router-outlet>

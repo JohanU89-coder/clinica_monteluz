@@ -1,11 +1,10 @@
-// tailwind.config.js
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    "./src/**/*.{html,ts}", // Esto le dice a Tailwind que escanee todos tus archivos de Angular
+    "./src/**/*.{html,ts}", // Le dice a Tailwind que busque en todos los archivos .html y .ts dentro de la carpeta src
   ],
   theme: {
     extend: {},
   },
   plugins: [],
-}
+};
