@@ -1,6 +1,8 @@
 package com.clinica.service;
 
 import com.clinica.model.*;
+import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,6 +27,27 @@ public class SupabaseService {
     public SupabaseService() {
         this.webClient = WebClient.builder().build();
         this.objectMapper = new ObjectMapper();
+    }
+    
+    public List<AppointmentDTO> getAppointmentsByPatient(String patiendID) throws Exception{
+    	List<AppointmentDTO> list = new ArrayList<>();
+    	String aptUrl = supabaseUrl + "/rest/v1/appointments?select=id&patient_id=eq." + patiendID;
+    	String aptResponse = webClient.get()
+                .uri(aptUrl)
+                .header("apikey", supabaseKey)
+                .header("Authorization", "Bearer " + supabaseKey)
+                .retrieve()
+                .bodyToMono(String.class)
+                .block();
+    	
+    	JsonNode appointments = objectMapper.readTree(aptResponse);
+    	if(appointments.size() > 0) {
+    		for (JsonNode item : appointments) {
+                list.add(getAppointmentWithDetails(item.get("id").asLong()));    			
+    		}
+    	}
+    	
+    	return list;
     }
 
     public AppointmentDTO getAppointmentWithDetails(Long appointmentId) {
@@ -61,6 +84,7 @@ public class SupabaseService {
 
             AppointmentDTO appointment = new AppointmentDTO();
             appointment.setId(aptNode.get("id").asLong());
+            appointment.setAppointmentTime(OffsetDateTime.parse(aptNode.get("appointment_time").asText()).toLocalDateTime());
             appointment.setPatientId(aptNode.get("patient_id").asText());
             appointment.setDoctorId(aptNode.get("doctor_id").asText());
             appointment.setDiagnosis(

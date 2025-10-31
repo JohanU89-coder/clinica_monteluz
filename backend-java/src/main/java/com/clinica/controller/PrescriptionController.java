@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/appointments")
+@RequestMapping("/api/appointments_ant")
 @CrossOrigin(origins = "http://localhost:4200")
 public class PrescriptionController {
 
