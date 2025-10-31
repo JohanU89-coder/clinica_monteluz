@@ -60,3 +60,6 @@ For more information on using the Angular CLI, including detailed command refere
 
 ### 🧍 Aporte individual - Stephany
 - Documentación del flujo de GitHub y primeras evidencias.
+
+### Aporte individual - Juan Cruz 
+- Changes in index.html file I added a title with my name.
