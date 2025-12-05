@@ -1,5 +1,3 @@
-// src/app/components/landing/landing.component.ts
-
 import { Component, EventEmitter, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
@@ -15,5 +13,12 @@ export class LandingComponent {
 
   goToAuth() {
     this.navigateToAuth.emit();
+  }
+
+  scrollTo(elementId: string) {
+    const element = document.getElementById(elementId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   }
 }

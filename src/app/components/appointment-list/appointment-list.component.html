@@ -1,179 +1,146 @@
 <div class="page-container">
   <header class="page-header">
     <h1>{{ title() }}</h1>
-    <p>Aquí puedes ver todas tus citas.</p>
+    <p *ngIf="listType === 'upcoming'">Gestiona tus próximas visitas médicas.</p>
+    <p *ngIf="listType === 'past'">Consulta tu historial y recetas médicas.</p>
   </header>
 
-
-  <div class="appointment-list">
+  <div class="appointment-grid">
     <ng-container *ngIf="appointments().length > 0; else noAppointments">
-      <div *ngFor="let apt of appointments()" class="appointment-card-wrapper">
+      
+      <div *ngFor="let apt of appointments()" class="ticket-card fade-in" [ngClass]="apt.status">
         
-        <div class="appointment-card" [ngClass]="apt.status">
-          <div class="date-block">
-            <span class="month">{{ apt.appointment_time | date:'MMM':'':'es-PE' }}</span>
+        <div class="ticket-content">
+          <div class="date-column">
             <span class="day">{{ apt.appointment_time | date:'d' }}</span>
+            <span class="month">{{ apt.appointment_time | date:'MMM':'':'es-PE' | uppercase }}</span>
+            <div class="time-pill">
+              {{ apt.appointment_time | date:'h:mm a':'':'es-PE' }}
+            </div>
           </div>
 
-
-          <div class="info-block">
+          <div class="info-column">
+            
             <ng-container *ngIf="userRole() === 'patient'">
-              <div class="person-details">
-                <div class="icon">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="12" cy="7" r="4"></circle>
-                  </svg>
+              <div class="person-header">
+                <div class="avatar-circle">
+                  {{ getInitials(apt.doctor?.full_name) }}
                 </div>
                 <div>
-                  <p class="person-name">{{ apt.patient?.full_name || 'Tú' }}</p>
-                  <p class="person-label">Paciente</p>
+                  <h3>Dr. {{ apt.doctor?.full_name }}</h3>
+                  <p class="subtitle">{{ apt.doctor?.specialties?.name }}</p>
                 </div>
               </div>
-              <div class="person-details">
-                <div class="icon">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="12" cy="7" r="4"></circle>
-                  </svg>
-                </div>
-                <div>
-                  <p class="person-name">{{ apt.doctor?.full_name }}</p>
-                  <p class="person-label">{{ apt.doctor?.specialties?.name || 'Doctor' }}</p>
-                </div>
+              <div class="patient-subinfo">
+                <small>Paciente: {{ apt.patient?.full_name || 'Tú' }}</small>
               </div>
             </ng-container>
-
 
             <ng-container *ngIf="userRole() === 'doctor'">
-              <div class="person-details">
-                <div class="icon">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="12" cy="7" r="4"></circle>
-                  </svg>
+              <div class="person-header">
+                <div class="avatar-circle patient-color">
+                  {{ getInitials(apt.patient?.full_name) }}
                 </div>
                 <div>
-                  <p class="person-name">{{ apt.patient?.full_name }}</p>
-                  <p class="person-label">Paciente</p>
+                  <h3>{{ apt.patient?.full_name }}</h3>
+                  <p class="subtitle">Paciente</p>
                 </div>
               </div>
             </ng-container>
 
-
-            <div class="time-details">
-              <div class="icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <polyline points="12 6 12 12 16 14"></polyline>
-                </svg>
-              </div>
-              <p class="time">{{ apt.appointment_time | date:'shortTime':'':'es-PE' }}</p>
-            </div>
-            
-            <div *ngIf="userRole() === 'doctor' && apt.rating" class="rating-details">
-              <div class="icon star-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path>
-                </svg>
-              </div>
-              <p class="rating-value">{{ apt.rating }} / 5</p>
+            <div *ngIf="apt.rating" class="mini-rating">
+              <span class="star">★</span> <span>{{ apt.rating }} / 5</span>
             </div>
           </div>
 
+          <div class="status-column">
+            <span class="status-badge" [ngClass]="apt.status">
+              {{ statusLabels[apt.status] || apt.status }}
+            </span>
 
-          <div class="action-block">
-            <span *ngIf="listType === 'past'" class="status-badge" [ngClass]="apt.status">{{ apt.status | titlecase }}</span>
-            <ng-container *ngIf="listType === 'upcoming'">
-              <div class="upcoming-actions">
-                <button *ngIf="userRole() === 'doctor'" class="complete-btn" (click)="completeAppointment(apt.id)">Completar</button>
-                <button class="cancel-btn" (click)="cancelAppointment(apt.id)">Cancelar</button>
-              </div>
-            </ng-container>
-            <ng-container *ngIf="listType === 'past' && apt.status === 'completed'">
-              <button class="action-btn" *ngIf="userRole() === 'doctor'" (click)="openEditor(apt.id)">
-                {{ apt.diagnosis ? 'Ver Detalles' : 'Añadir Diagnóstico' }}
+            <div class="actions-row" *ngIf="listType === 'upcoming'">
+              <button *ngIf="userRole() === 'doctor'" class="btn-icon check" title="Completar" (click)="completeAppointment(apt.id)">
+                ✓
               </button>
-              <button class="action-btn" *ngIf="userRole() === 'doctor' && !apt.prescriptions?.length" (click)="createPrescription(apt)">Crear Receta</button>
-              <button class="action-btn" *ngIf="userRole() === 'patient' && !apt.rating" (click)="openEditor(apt.id)">Calificar</button>
-              <button class="action-btn" *ngIf="userRole() === 'patient' && (apt.diagnosis || apt.rating)" (click)="openEditor(apt.id)">Ver Detalles</button>
-              <button class="action-btn" *ngIf="apt.prescriptions?.length" (click)="prescriptionService.view(apt.prescriptions![0]!.id)">Ver Receta</button>
-              
-              <!-- BOTÓN NUEVO: Exportar Receta -->
-              <button class="action-btn export-btn" *ngIf="apt.prescriptions?.length" (click)="appointmentService.exportPrescriptionPdf(apt.id)">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                  <polyline points="7 10 12 15 17 10"></polyline>
-                  <line x1="12" y1="15" x2="12" y2="3"></line>
-                </svg>
-                Exportar Receta
+              <button class="btn-icon trash" title="Cancelar" (click)="cancelAppointment(apt.id)">
+                ✕
               </button>
-            </ng-container>
+            </div>
+
+            <div class="actions-row" *ngIf="listType === 'past'">
+              <button class="btn-text" (click)="openEditor(apt.id)">
+                {{ (apt.diagnosis || apt.rating) ? 'Ver Detalles' : 'Detalles' }}
+              </button>
+            </div>
           </div>
         </div>
 
-
-        <div class="expandable-form" *ngIf="editingAppointmentId() === apt.id">
-          <ng-container *ngIf="userRole() === 'doctor'">
-            <div class="diagnosis-display">
-              <strong>Diagnóstico:</strong>
-              <p *ngIf="apt.diagnosis" class="diagnosis-text">{{ apt.diagnosis }}</p>
-              <div *ngIf="!apt.diagnosis" class="action-form">
-                <textarea #diagnosis placeholder="Escribe el diagnóstico..."></textarea>
-                <div class="form-actions">
-                  <button class="primary-btn" (click)="submitDiagnosis(apt.id, diagnosis)">Guardar</button>
-                </div>
-              </div>
-            </div>
-            <div *ngIf="apt.rating" class="rating-display">
-              <strong>Calificación del Paciente:</strong>
-              <div class="stars">
-                <span *ngFor="let star of [1,2,3,4,5]" [class.filled]="star <= apt.rating">★</span>
-                <span class="rating-value-text">({{ apt.rating }} / 5)</span>
-              </div>
-              <p *ngIf="apt.feedback"><strong>Comentario:</strong> "{{ apt.feedback }}"</p>
-            </div>
-          </ng-container>
+        <div class="expandable-drawer" *ngIf="editingAppointmentId() === apt.id">
           
+          <ng-container *ngIf="userRole() === 'doctor'">
+            <div class="drawer-section">
+              <label>Diagnóstico Médico</label>
+              <div *ngIf="apt.diagnosis" class="read-only-box">{{ apt.diagnosis }}</div>
+              
+              <div *ngIf="!apt.diagnosis" class="input-group">
+                <textarea #diagnosis placeholder="Escribe el diagnóstico clínico..."></textarea>
+                <button class="save-btn" (click)="submitDiagnosis(apt.id, diagnosis)">Guardar Diagnóstico</button>
+              </div>
+            </div>
+
+            <div class="drawer-actions">
+              <button *ngIf="!apt.prescriptions?.length" class="action-chip blue" (click)="createPrescription(apt)">
+                + Crear Receta
+              </button>
+              <button *ngIf="apt.prescriptions?.length" class="action-chip green" (click)="prescriptionService.view(apt.prescriptions![0]!.id)">
+                Ver Receta
+              </button>
+            </div>
+          </ng-container>
+
           <ng-container *ngIf="userRole() === 'patient'">
-            <div *ngIf="apt.diagnosis" class="diagnosis-display">
-              <strong>Diagnóstico del Médico:</strong>
-              <p>{{ apt.diagnosis }}</p>
+            <div class="drawer-section" *ngIf="apt.diagnosis">
+              <label>Diagnóstico del Doctor</label>
+              <div class="read-only-box">{{ apt.diagnosis }}</div>
             </div>
-            <div *ngIf="apt.rating" class="rating-display">
-              <strong>Tu Calificación:</strong>
-              <div class="stars">
-                <span *ngFor="let star of [1,2,3,4,5]" [class.filled]="star <= apt.rating">★</span>
+
+            <div class="drawer-actions" *ngIf="apt.prescriptions?.length">
+              <button class="action-chip green full-width" (click)="appointmentService.exportPrescriptionPdf(apt.id)">
+                📄 Descargar Receta Médica (PDF)
+              </button>
+            </div>
+
+            <div class="drawer-section rating-section">
+              <label>Tu Experiencia</label>
+              <div *ngIf="apt.rating" class="read-only-rating">
+                <span *ngFor="let s of [1,2,3,4,5]" [class.filled]="s <= apt.rating">★</span>
+                <p>"{{ apt.feedback }}"</p>
               </div>
-              <p *ngIf="apt.feedback"><strong>Comentario:</strong> "{{ apt.feedback }}"</p>
-            </div>
-            <div *ngIf="!apt.rating" class="action-form">
-              <div class="rating-input">
-                <p>Tu Calificación:</p>
-                <div class="stars-input">
-                  <button *ngFor="let star of [1,2,3,4,5]" (click)="currentRating.set(star)" [class.selected]="star <= (currentRating() || 0)">★</button>
+
+              <div *ngIf="!apt.rating" class="rating-input-container">
+                <div class="stars-select">
+                  <button *ngFor="let s of [1,2,3,4,5]" (click)="currentRating.set(s)" [class.active]="s <= (currentRating() || 0)">★</button>
                 </div>
-              </div>
-              <textarea #feedback placeholder="Deja un comentario (opcional)..."></textarea>
-              <div class="form-actions">
-                <button class="primary-btn" *ngIf="currentRating()" (click)="submitRating(apt.id, currentRating()!, feedback)">Guardar Calificación</button>
+                <textarea #feedback placeholder="¿Cómo fue tu atención? (Opcional)"></textarea>
+                <button class="save-btn" *ngIf="currentRating()" (click)="submitRating(apt.id, currentRating()!, feedback)">Enviar Calificación</button>
               </div>
             </div>
           </ng-container>
 
-
-          <div class="form-actions close-action">
-            <button class="secondary-btn" (click)="closeEditor()">Cerrar</button>
+          <div class="drawer-footer">
+            <button class="close-link" (click)="closeEditor()">Cerrar panel</button>
           </div>
         </div>
-
 
       </div>
     </ng-container>
 
-
     <ng-template #noAppointments>
-      <div class="empty-state"><p>No tienes citas en esta lista.</p></div>
+      <div class="empty-state">
+        <div class="empty-icon">📅</div>
+        <h3>No hay citas {{ listType === 'upcoming' ? 'programadas' : 'en el historial' }}</h3>
+        <p>Tus citas aparecerán aquí.</p>
+      </div>
     </ng-template>
   </div>
 </div>

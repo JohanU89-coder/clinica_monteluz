@@ -20,6 +20,7 @@ export class BookAppointmentComponent {
   
   selectedSpecialtyId: number | null = null;
   
+  // Computed para obtener el objeto del doctor seleccionado
   selectedDoctor = computed(() => {
     const doctorId = this.bookingService.selectedDoctorId();
     if (!doctorId) return null;
@@ -27,6 +28,7 @@ export class BookAppointmentComponent {
   });
 
   constructor() {
+    // Si solo hay un perfil (el usuario), selecciónalo automáticamente
     effect(() => {
       const profiles = this.authService.bookableProfiles();
       if (profiles.length === 1) {
@@ -35,16 +37,22 @@ export class BookAppointmentComponent {
     });
   }
 
-  onSpecialtyChange(specialtyId: number | null) {
-    this.selectedSpecialtyId = specialtyId;
+  onSpecialtyChange(specialtyId: any) {
+    // Aseguramos que sea número
+    const id = Number(specialtyId);
+    this.selectedSpecialtyId = id;
+    
+    // Reseteamos selecciones posteriores
     this.bookingService.resetDoctorAndSlotSelection(); 
-    if (specialtyId) {
-      this.dataService.loadDoctorsBySpecialty(specialtyId);
+    
+    if (id) {
+      this.dataService.loadDoctorsBySpecialty(id);
     }
   }
   
   selectDoctor(doctor: Profile) {
-    if (this.authService.bookableProfiles().length === 1 && !this.bookingService.forPatientId()) {
+    // Si no se ha seleccionado paciente (caso borde), seleccionar al usuario actual
+    if (!this.bookingService.forPatientId()) {
       this.bookingService.forPatientId.set(this.authService.userProfile()!.id);
     }
     this.bookingService.selectedDoctorId.set(doctor.id);
@@ -62,5 +70,24 @@ export class BookAppointmentComponent {
 
   confirmBooking() {
     this.bookingService.bookAppointment();
+  }
+
+  // --- HELPERS VISUALES ---
+
+  // Obtener iniciales (ej: Juan Perez -> JP)
+  getInitials(name: string): string {
+    return name ? name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase() : '';
+  }
+
+  // Obtener nombre del paciente para el resumen
+  getPatientName(): string | undefined {
+    const profile = this.authService.bookableProfiles().find(p => p.id === this.bookingService.forPatientId());
+    return profile?.full_name;
+  }
+
+  // Obtener nombre de la especialidad para el resumen
+  getSpecialtyName(): string | undefined {
+    const spec = this.dataService.specialties().find(s => s.id === this.selectedSpecialtyId);
+    return spec?.name;
   }
 }

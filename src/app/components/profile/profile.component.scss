@@ -1,110 +1,182 @@
-// src/app/components/profile/profile.component.scss
+// Variables
+$primary: #0056b3;
+$text-dark: #2c3e50;
+$text-muted: #6c757d;
+$white: #ffffff;
+$bg-page: #f8f9fa;
+$border: #e2e8f0;
+$radius: 16px;
+
+.page-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1rem;
+}
 
 .page-header {
   margin-bottom: 2rem;
-  h1 { font-size: 2rem; color: var(--dark-blue); }
-  p { color: var(--text-muted); }
+  text-align: center;
+  h1 { font-size: 1.8rem; font-weight: 700; color: $text-dark; margin-bottom: 0.5rem; }
+  p { color: $text-muted; }
 }
 
+.profile-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  justify-items: center; // Centrar tarjeta
+}
+
+// === TARJETA DE PERFIL ===
 .profile-card {
-  max-width: 700px;
-  background: var(--white);
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  width: 100%;
+  max-width: 500px;
+  background: $white;
+  border-radius: $radius;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
   overflow: hidden;
+  position: relative;
 }
 
-.profile-header {
-  background-color: var(--dark-blue);
-  color: var(--white);
-  padding: 2rem;
-  h2 {
-    color: var(--white);
-    margin: 0;
-    font-size: 1.8rem;
-  }
-  .role {
-    background-color: var(--mid-blue);
-    padding: 0.25rem 0.75rem;
-    border-radius: 12px;
-    font-size: 0.8rem;
-    font-weight: 500;
-    display: inline-block;
-    margin-top: 0.5rem;
-    text-transform: capitalize;
-  }
+.card-cover {
+  height: 120px;
+  background: linear-gradient(135deg, $primary, #00d2ff);
 }
 
-.profile-details {
-  padding: 2rem;
-  .detail-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 1rem 0;
-    &:not(:last-child) {
-      border-bottom: 1px solid var(--border-color);
-    }
-    .label {
-      font-weight: 500;
-      color: var(--text-muted);
-    }
-    .value {
-      font-weight: 600;
-      color: var(--text-color);
-    }
-  }
-  hr {
-    border: none;
-    border-top: 1px solid var(--border-color);
-    margin: 1rem 0;
-  }
+.card-content {
+  padding: 0 2rem 2rem 2rem;
+  margin-top: -50px; // Subir contenido sobre el cover
 }
 
-.profile-footer {
-  background-color: var(--light-bg);
-  padding: 1rem 2rem;
+.avatar-container {
   display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
-
-  .edit-btn {
-    background-color: var(--primary-color);
-    color: var(--white);
-  }
-}
-
-// --- ESTILOS NUEVOS PARA EL FORMULARIO ---
-.profile-form {
-  padding: 2rem;
-}
-
-.form-group {
+  flex-direction: column;
+  align-items: center;
   margin-bottom: 1.5rem;
   
-  label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 500;
-    color: var(--text-muted);
-  }
-
-  input {
-    width: 100%;
-    padding: 0.8rem 1rem;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    font-size: 1rem;
-  }
-}
-
-.profile-footer {
-  button.secondary {
-    background-color: var(--text-muted);
+  .avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 4px solid $white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    font-weight: 700;
     color: white;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
   }
   
-  button.save-btn {
-    background-color: #198754; // Verde
+  .role-badge {
+    margin-top: 0.5rem;
+    background: $text-dark;
     color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    
+    &.doctor { background: #198754; } // Verde para doctores
   }
 }
+
+.text-center { text-align: center; margin-bottom: 2rem; }
+
+.info-section {
+  h2 { margin: 0 0 0.5rem 0; color: $text-dark; font-size: 1.5rem; }
+  .email-text { color: $text-muted; margin: 0; font-size: 0.95rem; }
+}
+
+.details-grid {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  
+  .detail-box {
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 10px;
+    border: 1px solid $border;
+    
+    .label { color: $text-muted; font-size: 0.9rem; }
+    .value { color: $text-dark; font-weight: 600; }
+  }
+}
+
+.card-actions {
+  .btn-primary {
+    width: 100%;
+    padding: 0.8rem;
+    background: $primary;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    &:hover { background: darken($primary, 5%); }
+  }
+}
+
+// === FORMULARIO DE EDICIÓN ===
+.edit-form {
+  padding-top: 1rem;
+  
+  .form-group {
+    margin-bottom: 1.2rem;
+    label { display: block; font-size: 0.85rem; font-weight: 600; color: $text-muted; margin-bottom: 0.5rem; }
+    input {
+      width: 100%;
+      padding: 0.8rem;
+      border: 1px solid $border;
+      border-radius: 8px;
+      font-size: 1rem;
+      &:focus { outline: none; border-color: $primary; }
+    }
+  }
+
+  .edit-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    
+    button {
+      flex: 1;
+      padding: 0.8rem;
+      border-radius: 8px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    
+    .btn-secondary { background: #e9ecef; color: $text-dark; &:hover { background: #dee2e6; } }
+    .btn-save { background: $primary; color: white; &:disabled { opacity: 0.7; } }
+  }
+}
+
+// === INFO SEGURIDAD ===
+.security-info {
+  width: 100%;
+  max-width: 500px;
+  margin-top: 2rem;
+  
+  h3 { font-size: 1rem; color: $text-muted; text-transform: uppercase; margin-bottom: 1rem; letter-spacing: 1px; }
+  
+  .info-row {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    
+    .icon { font-size: 1.5rem; }
+    h4 { margin: 0 0 0.2rem 0; font-size: 1rem; color: $text-dark; }
+    p { margin: 0; font-size: 0.85rem; color: $text-muted; }
+  }
+}
+
+.fade-in { animation: fadeIn 0.4s ease-in-out; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }

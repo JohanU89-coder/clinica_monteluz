@@ -1,63 +1,98 @@
 <div class="page-container">
   <header class="page-header">
-    <h1>Mi Perfil</h1>
-    <p>Aquí puedes ver y editar los detalles de tu cuenta.</p>
+    <h1>Configuración de Cuenta</h1>
+    <p>Gestiona tu información personal y profesional.</p>
   </header>
 
-  <div class="profile-card" *ngIf="authService.userProfile() as profile">
+  <div class="profile-layout" *ngIf="authService.userProfile() as profile">
     
-    <ng-container *ngIf="!isEditing()">
-      <div class="profile-header">
-        <h2>{{ profile.full_name }}</h2>
-        <span class="role">{{ profile.role === 'doctor' ? 'Doctor' : 'Paciente' }}</span>
-      </div>
-      <div class="profile-details">
-        <div class="detail-item">
-          <span class="label">Correo Electrónico</span>
-          <span class="value">{{ profile.email }}</span>
-        </div>
-        <div class="detail-item">
-          <span class="label">Miembro desde</span>
-          <span class="value">{{ profile.created_at | date:'longDate':'':'es-PE' }}</span>
-        </div>
-        <ng-container *ngIf="profile.role === 'doctor'">
-          <hr>
-          <div class="detail-item">
-            <span class="label">Especialidad</span>
-            <span class="value">{{ profile.specialties?.name || 'No especificada' }}</span>
+    <div class="profile-card fade-in">
+      
+      <div class="card-cover"></div>
+      
+      <div class="card-content">
+        <div class="avatar-container">
+          <div class="avatar" [style.background-color]="getAvatarColor(profile.full_name)">
+            {{ getInitials(profile.full_name) }}
           </div>
-          <div class="detail-item">
-            <span class="label">Número de Licencia</span>
-            <span class="value">{{ profile.license_number || 'No especificado' }}</span>
+          <div class="role-badge" [class.doctor]="profile.role === 'doctor'">
+            {{ profile.role === 'doctor' ? 'Personal Médico' : 'Paciente' }}
           </div>
-        </ng-container>
-      </div>
-      <div class="profile-footer">
-        <button class="edit-btn" (click)="toggleEdit(true)">Editar Perfil</button>
-      </div>
-    </ng-container>
+        </div>
 
-    <ng-container *ngIf="isEditing()">
-      <div class="profile-header">
-        <h2>Editando Perfil</h2>
-      </div>
-      <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="profile-form">
-        <div class="form-group">
-          <label for="fullName">Nombre Completo</label>
-          <input id="fullName" type="text" formControlName="full_name">
-        </div>
-        <ng-container *ngIf="profile.role === 'doctor'">
-          <div class="form-group">
-            <label for="license">Número de Licencia</label>
-            <input id="license" type="text" formControlName="license_number">
+        <ng-container *ngIf="!isEditing()">
+          <div class="info-section text-center">
+            <h2>{{ profile.full_name }}</h2>
+            <p class="email-text">{{ profile.email }}</p>
+          </div>
+
+          <div class="details-grid">
+            <div class="detail-box">
+              <span class="label">Miembro Desde</span>
+              <span class="value">{{ profile.created_at | date:'MMMM yyyy':'':'es-PE' | titlecase }}</span>
+            </div>
+            
+            <ng-container *ngIf="profile.role === 'doctor'">
+              <div class="detail-box">
+                <span class="label">Especialidad</span>
+                <span class="value">{{ profile.specialties?.name || 'General' }}</span>
+              </div>
+              <div class="detail-box">
+                <span class="label">Licencia Médica</span>
+                <span class="value">{{ profile.license_number || '---' }}</span>
+              </div>
+            </ng-container>
+          </div>
+
+          <div class="card-actions">
+            <button class="btn-primary" (click)="toggleEdit(true)">
+              Editar Información
+            </button>
           </div>
         </ng-container>
-      </form>
-      <div class="profile-footer">
-        <button class="secondary" (click)="toggleEdit(false)">Cancelar</button>
-        <button class="save-btn" (click)="saveProfile()" [disabled]="profileForm.invalid">Guardar Cambios</button>
+
+        <ng-container *ngIf="isEditing()">
+          <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="edit-form">
+            
+            <div class="form-group">
+              <label>Nombre Completo</label>
+              <input type="text" formControlName="full_name" placeholder="Tu nombre legal">
+            </div>
+
+            <ng-container *ngIf="profile.role === 'doctor'">
+              <div class="form-group">
+                <label>Número de Licencia (CMP)</label>
+                <input type="text" formControlName="license_number" placeholder="Ej: 123456">
+              </div>
+            </ng-container>
+
+            <div class="edit-actions">
+              <button type="button" class="btn-secondary" (click)="toggleEdit(false)">Cancelar</button>
+              <button type="submit" class="btn-save" [disabled]="profileForm.invalid">Guardar Cambios</button>
+            </div>
+          </form>
+        </ng-container>
+
       </div>
-    </ng-container>
-    
+    </div>
+
+    <div class="security-info fade-in">
+      <h3>Seguridad de la Cuenta</h3>
+      <div class="info-row">
+        <div class="icon">🔒</div>
+        <div>
+          <h4>Contraseña</h4>
+          <p>Gestionada de forma segura a través de Supabase Auth.</p>
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="icon">📧</div>
+        <div>
+          <h4>Verificación</h4>
+          <p>Tu correo {{ profile.email }} está verificado.</p>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>

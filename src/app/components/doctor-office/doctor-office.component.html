@@ -1,48 +1,100 @@
 <div class="page-container">
   <header class="page-header">
-    <h1>Mi Consultorio</h1>
-    <p>Administra tus horarios de atención semanales.</p>
+    <div class="header-content">
+      <div>
+        <h1>Mi Consultorio</h1>
+        <p>Configura tu disponibilidad semanal para que los pacientes puedan encontrarte.</p>
+      </div>
+      <div class="stats-badge" *ngIf="totalBlocks() > 0">
+        <span class="count">{{ totalBlocks() }}</span>
+        <span class="label">Bloques Activos</span>
+      </div>
+    </div>
   </header>
 
   <div class="office-layout">
-    <section class="schedule-list-section">
-      <h3>Mis Horarios Actuales</h3>
-      <ul class="schedule-list" *ngIf="scheduleService.mySchedule().length > 0; else noSchedules">
-        <li *ngFor="let schedule of scheduleService.mySchedule()">
-          <div class="schedule-info">
-            <span class="day">{{ getDayName(schedule.day_of_week) }}</span>
-            <span class="time">{{ schedule.start_time }} - {{ schedule.end_time }}</span>
+    
+    <section class="weekly-grid fade-in">
+      <div class="grid-header">
+        <h3>Tu Semana Laboral</h3>
+        <p class="subtitle">Tus horarios visibles para los pacientes</p>
+      </div>
+
+      <ng-container *ngIf="scheduleService.mySchedule().length > 0; else emptyState">
+        <div class="days-container">
+          <div *ngFor="let day of daysOfWeek" class="day-card" [class.active]="hasSchedules(day.id)">
+            <div class="day-header">
+              <span class="day-name">{{ day.name }}</span>
+              <span class="schedule-count" *ngIf="hasSchedules(day.id)">
+                {{ groupedSchedules()[day.id].length }} turnos
+              </span>
+            </div>
+
+            <div class="day-body">
+              <div *ngIf="!hasSchedules(day.id)" class="no-slots">
+                No laboral
+              </div>
+              
+              <div class="slots-list" *ngIf="hasSchedules(day.id)">
+                <div *ngFor="let slot of groupedSchedules()[day.id]" class="time-chip">
+                  <span class="time-range">{{ slot.start_time.slice(0,5) }} - {{ slot.end_time.slice(0,5) }}</span>
+                  <button class="remove-btn" (click)="handleDeleteSchedule(slot.id)" title="Eliminar horario">
+                    &times;
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
-          <button class="delete-btn" (click)="handleDeleteSchedule(schedule.id)">Eliminar</button>
-        </li>
-      </ul>
-      <ng-template #noSchedules>
-        <p class="empty-state">Aún no has configurado ningún horario de atención.</p>
+        </div>
+      </ng-container>
+
+      <ng-template #emptyState>
+        <div class="empty-calendar">
+          <div class="icon">📅</div>
+          <h3>Calendario Vacío</h3>
+          <p>Añade tu primer horario en el panel de la derecha para comenzar.</p>
+        </div>
       </ng-template>
     </section>
 
-    <section class="add-schedule-section">
-      <h3>Añadir Nuevo Horario</h3>
-      <form [formGroup]="scheduleForm" (ngSubmit)="handleAddSchedule()" class="schedule-form">
-        <div class="form-group">
-          <label for="day">Día de la semana</label>
-          <select id="day" formControlName="day">
-            <option [ngValue]="null" disabled>Selecciona un día...</option>
-            <option *ngFor="let day of daysOfWeek" [value]="day.id">{{ day.name }}</option>
-          </select>
+    <aside class="control-panel">
+      <div class="panel-card sticky-panel fade-in">
+        <div class="panel-header">
+          <h3>Añadir Horario</h3>
         </div>
-        <div class="form-group-inline">
+        
+        <form [formGroup]="scheduleForm" (ngSubmit)="handleAddSchedule()" class="schedule-form">
           <div class="form-group">
-            <label for="startTime">Hora de Inicio</label>
-            <input id="startTime" type="time" formControlName="startTime">
+            <label for="day">Día de la Semana</label>
+            <div class="select-wrapper">
+              <select id="day" formControlName="day">
+                <option [ngValue]="null" disabled>Selecciona día...</option>
+                <option *ngFor="let day of daysOfWeek" [value]="day.id">{{ day.name }}</option>
+              </select>
+              <span class="arrow">▼</span>
+            </div>
           </div>
-          <div class="form-group">
-            <label for="endTime">Hora de Fin</label>
-            <input id="endTime" type="time" formControlName="endTime">
+
+          <div class="time-inputs-row">
+            <div class="form-group half">
+              <label for="startTime">Inicio</label>
+              <input id="startTime" type="time" formControlName="startTime">
+            </div>
+            <div class="form-group half">
+              <label for="endTime">Fin</label>
+              <input id="endTime" type="time" formControlName="endTime">
+            </div>
           </div>
-        </div>
-        <button type="submit" [disabled]="scheduleForm.invalid" class="add-btn">Añadir Horario</button>
-      </form>
-    </section>
+
+          <div class="form-footer">
+            <button type="submit" [disabled]="scheduleForm.invalid" class="add-btn">
+              <span class="plus">+</span> Agregar Bloque
+            </button>
+            <p class="helper-text">Recuerda guardar intervalos lógicos (ej: 09:00 a 13:00).</p>
+          </div>
+        </form>
+      </div>
+    </aside>
+
   </div>
 </div>

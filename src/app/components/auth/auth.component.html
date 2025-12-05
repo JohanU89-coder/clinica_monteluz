@@ -1,57 +1,106 @@
-<div class="auth-box">
-  <div class="header">
-    <h2>Clínica Monteluz</h2>
-    <p>{{ authMode() === 'login' ? 'Bienvenido de vuelta' : 'Crea tu cuenta para empezar' }}</p>
-  </div>
-  <form [formGroup]="authForm" (ngSubmit)="handleAuth()">
-
-    <ng-container *ngIf="authMode() === 'register'">
-      <div class="form-group">
-        <label for="fullName">Nombre Completo</label>
-        <input id="fullName" type="text" formControlName="fullName" placeholder="John Doe">
-      </div>
-      <div class="role-selector">
-        <label>Soy:</label>
-        <div class="role-buttons">
-          <button type="button" [class.active]="role() === 'patient'" (click)="role.set('patient')">Paciente</button>
-          <button type="button" [class.active]="role() === 'doctor'" (click)="role.set('doctor')">Doctor</button>
+<div class="auth-container fade-in">
+  
+  <div class="form-side">
+    <div class="form-wrapper">
+      
+      <div class="brand-header">
+        <div class="logo-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>
         </div>
+        <h1>Clínica Monteluz</h1>
       </div>
-    </ng-container>
 
-    <div class="form-group">
-      <label for="email">Correo Electrónico</label>
-      <input id="email" type="email" formControlName="email" placeholder="email@ejemplo.com">
+      <div class="text-header">
+        <h2>{{ authMode() === 'login' ? 'Bienvenido de nuevo' : 'Crear cuenta nueva' }}</h2>
+        <p>{{ authMode() === 'login' ? 'Ingresa tus credenciales para acceder.' : 'Únete a nosotros para gestionar tu salud.' }}</p>
+      </div>
+
+      <form [formGroup]="authForm" (ngSubmit)="handleAuth()" class="modern-form">
+        
+        <div class="role-switch-container" *ngIf="authMode() === 'register'">
+          <div class="role-switch">
+            <button type="button" [class.active]="role() === 'patient'" (click)="role.set('patient')">
+              Paciente
+            </button>
+            <button type="button" [class.active]="role() === 'doctor'" (click)="role.set('doctor')">
+              Personal Médico
+            </button>
+          </div>
+        </div>
+
+        <ng-container *ngIf="authMode() === 'register'">
+          <div class="input-group">
+            <label>Nombre Completo</label>
+            <div class="input-wrapper">
+              <span class="icon">👤</span>
+              <input type="text" formControlName="fullName" placeholder="Ej: Juan Pérez">
+            </div>
+          </div>
+        </ng-container>
+
+        <div class="input-group">
+          <label>Correo Electrónico</label>
+          <div class="input-wrapper">
+            <span class="icon">✉️</span>
+            <input type="email" formControlName="email" placeholder="nombre@correo.com">
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label>Contraseña</label>
+          <div class="input-wrapper">
+            <span class="icon">🔒</span>
+            <input type="password" formControlName="password" placeholder="••••••••">
+          </div>
+        </div>
+
+        <ng-container *ngIf="authMode() === 'register' && role() === 'doctor'">
+          <div class="doctor-fields animate-slide-down">
+            <div class="input-group">
+              <label>Especialidad</label>
+              <div class="input-wrapper">
+                <span class="icon">🩺</span>
+                <select formControlName="specialty_id">
+                  <option [ngValue]="null" disabled>Selecciona...</option>
+                  <option *ngFor="let spec of dataService.specialties()" [value]="spec.id">{{ spec.name }}</option>
+                </select>
+              </div>
+            </div>
+            <div class="input-group">
+              <label>N° Licencia (CMP)</label>
+              <div class="input-wrapper">
+                <span class="icon">🆔</span>
+                <input type="text" formControlName="license_number" placeholder="Ej: 123456">
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
+        <button type="submit" class="submit-btn" [disabled]="loading() || authForm.invalid">
+          {{ loading() ? 'Procesando...' : (authMode() === 'login' ? 'Iniciar Sesión' : 'Registrarse') }}
+        </button>
+
+      </form>
+
+      <div class="auth-footer">
+        <p *ngIf="authMode() === 'login'">
+          ¿No tienes cuenta? <a (click)="toggleMode('register')">Regístrate gratis</a>
+        </p>
+        <p *ngIf="authMode() === 'register'">
+          ¿Ya tienes cuenta? <a (click)="toggleMode('login')">Inicia sesión</a>
+        </p>
+      </div>
+
     </div>
-    <div class="form-group">
-      <label for="password">Contraseña</label>
-      <input id="password" type="password" formControlName="password" placeholder="••••••••">
-    </div>
-
-    <ng-container *ngIf="authMode() === 'register' && role() === 'doctor'">
-      <div class="form-group">
-        <label for="specialty">Especialidad</label>
-        <select id="specialty" formControlName="specialty_id">
-          <option [ngValue]="null" disabled>Seleccione una especialidad</option>
-          <option *ngFor="let spec of dataService.specialties()" [value]="spec.id">{{ spec.name }}</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label for="license">Número de Licencia</label>
-        <input type="text" id="license" formControlName="license_number">
-      </div>
-    </ng-container>
-
-    <button class="submit-btn" type="submit" [disabled]="loading() || authForm.invalid">
-      {{ loading() ? 'Cargando...' : (authMode() === 'login' ? 'Iniciar Sesión' : 'Registrarse') }}
-    </button>
-  </form>
-  <div class="switch-mode">
-    <p *ngIf="authMode() === 'login'">
-      ¿No tienes cuenta? <a (click)="authMode.set('register')">Regístrate aquí</a>
-    </p>
-    <p *ngIf="authMode() === 'register'">
-      ¿Ya tienes una cuenta? <a (click)="authMode.set('login')">Inicia sesión</a>
-    </p>
   </div>
+
+  <div class="image-side">
+    <div class="overlay">
+      <div class="quote-box">
+        <h3>"La medicina es el acto más humano de todos."</h3>
+        <p>Gestiona tus citas y pacientes con la tecnología de Monteluz.</p>
+      </div>
+    </div>
+  </div>
+
 </div>

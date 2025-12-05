@@ -1,91 +1,180 @@
 <div class="page-container">
   <header class="page-header">
-    <h1>Agendar una Nueva Cita</h1>
-    <p>Sigue los pasos para encontrar un horario conveniente.</p>
+    <div class="header-content">
+      <h1>Agendar Cita</h1>
+      <p>Completa los pasos para programar tu atención en Clínica Monteluz.</p>
+    </div>
   </header>
 
-  <div *ngIf="bookingService.bookingStatus() === 'success'" class="alert success">
-    ¡Cita agendada con éxito! Puedes verla en la pestaña "Próximas Citas".
-  </div>
-  <div *ngIf="bookingService.bookingStatus() === 'error'" class="alert error">
-    Hubo un error al agendar tu cita. Por favor, inténtalo de nuevo.
-  </div>
-
-  <section class="booking-flow">
-    
-    <div class="step" *ngIf="authService.bookableProfiles().length > 1">
-      <h3>0. ¿Para quién es la cita?</h3>
-      <select [ngModel]="bookingService.forPatientId()" (ngModelChange)="bookingService.forPatientId.set($event)">
-        <option [ngValue]="null" disabled>Selecciona un miembro de la familia...</option>
-  
-        <option *ngFor="let profile of authService.bookableProfiles(); let i = index" [value]="profile.id">
-      {{ profile.full_name }} {{ i === 0 ? '(Tú)' : '' }}
-  </option>
-
-</select>
+  <div *ngIf="bookingService.bookingStatus() === 'success'" class="alert success fade-in">
+    <div class="icon">✓</div>
+    <div>
+      <strong>¡Cita confirmada!</strong>
+      <p>Puedes ver los detalles en la pestaña "Mis Citas".</p>
     </div>
+  </div>
+  
+  <div *ngIf="bookingService.bookingStatus() === 'error'" class="alert error fade-in">
+    <div class="icon">✕</div>
+    <div>
+      <strong>Ocurrió un error</strong>
+      <p>Por favor inténtalo nuevamente.</p>
+    </div>
+  </div>
 
-    <ng-container *ngIf="bookingService.forPatientId()">
-      <div class="step">
-        <h3>1. Selecciona una Especialidad</h3>
-        <select [ngModel]="selectedSpecialtyId" (ngModelChange)="onSpecialtyChange($event)">
-          <option [ngValue]="null" disabled>Elige una especialidad...</option>
-          <option *ngFor="let spec of dataService.specialties()" [value]="spec.id">{{ spec.name }}</option>
-        </select>
-      </div>
-
-      <div class="step" *ngIf="dataService.doctors().length > 0">
-        <h3>2. Selecciona un Doctor</h3>
-        <div class="doctor-list">
-          <button *ngFor="let doctor of dataService.doctors()" class="doctor-card" [class.selected]="bookingService.selectedDoctorId() === doctor.id" (click)="selectDoctor(doctor)">
-            <h4>{{ doctor.full_name }}</h4>
-            <p>{{ doctor.specialties?.name }}</p>
-          </button>
+  <div class="booking-grid">
+    
+    <section class="booking-flow">
+      
+      <div class="step-card fade-in" *ngIf="authService.bookableProfiles().length > 1">
+        <div class="step-header">
+          <span class="step-number">1</span>
+          <h3>¿Quién es el paciente?</h3>
+        </div>
+        <div class="custom-select-wrapper">
+          <select [ngModel]="bookingService.forPatientId()" (ngModelChange)="bookingService.forPatientId.set($event)">
+            <option [ngValue]="null" disabled>Selecciona un paciente...</option>
+            <option *ngFor="let profile of authService.bookableProfiles(); let i = index" [value]="profile.id">
+              {{ profile.full_name }} {{ i === 0 ? '(Tú)' : '' }}
+            </option>
+          </select>
+          <span class="arrow">▼</span>
         </div>
       </div>
 
-      <div class="step" *ngIf="bookingService.selectedDoctorId()">
-        <h3>3. Selecciona un Horario Disponible para <strong>{{ selectedDoctor()?.full_name }}</strong></h3>
+      <ng-container *ngIf="bookingService.forPatientId()">
         
-        <div class="day-selector" *ngIf="bookingService.availableDays().length > 0; else noSlots">
-          <button *ngFor="let day of bookingService.availableDays()" 
-                  class="day-button"
-                  [class.selected]="bookingService.selectedDate() === day.toISOString().split('T')[0]"
-                  (click)="selectDay(day)">
-            <span class="day-name">{{ day | date:'EEE':'':'es-PE' }}</span>
-            <span class="day-number">{{ day | date:'d' }}</span>
-          </button>
+        <div class="step-card fade-in">
+          <div class="step-header">
+            <span class="step-number">{{ authService.bookableProfiles().length > 1 ? '2' : '1' }}</span>
+            <h3>Especialidad</h3>
+          </div>
+          <div class="custom-select-wrapper">
+            <select [ngModel]="selectedSpecialtyId" (ngModelChange)="onSpecialtyChange($event)">
+              <option [ngValue]="null" disabled>Selecciona especialidad...</option>
+              <option *ngFor="let spec of dataService.specialties()" [value]="spec.id">{{ spec.name }}</option>
+            </select>
+            <span class="arrow">▼</span>
+          </div>
         </div>
-        
-        <div *ngIf="bookingService.selectedDate()">
-          <h4 class="time-header">Horas disponibles para el {{ bookingService.selectedDate() | date:'fullDate':'':'es-PE' }}</h4>
-          <div class="slots-list">
-            <button *ngFor="let slot of bookingService.filteredSlotsByDay()"
-                    class="slot-button"
-                    [class.selected]="bookingService.selectedSlot()?.value === slot.value"
-                    (click)="selectSlot(slot)">
-              {{ slot.display }}
+
+        <div class="step-card fade-in" *ngIf="dataService.doctors().length > 0">
+          <div class="step-header">
+            <span class="step-number">{{ authService.bookableProfiles().length > 1 ? '3' : '2' }}</span>
+            <h3>Selecciona tu Especialista</h3>
+          </div>
+          <div class="doctor-grid">
+            <button *ngFor="let doctor of dataService.doctors()" 
+                    class="doctor-card" 
+                    [class.selected]="bookingService.selectedDoctorId() === doctor.id" 
+                    (click)="selectDoctor(doctor)">
+              <div class="avatar-circle">
+                {{ getInitials(doctor.full_name) }}
+              </div>
+              <div class="doctor-info">
+                <h4>Dr. {{ doctor.full_name }}</h4>
+                <p>{{ doctor.specialties?.name }}</p>
+              </div>
+              <div class="check-icon" *ngIf="bookingService.selectedDoctorId() === doctor.id">✓</div>
             </button>
           </div>
         </div>
 
-        <ng-template #noSlots>
-          <p class="empty-state">Este doctor no tiene horarios disponibles en los próximos 14 días.</p>
-        </ng-template>
+        <div class="step-card fade-in" *ngIf="bookingService.selectedDoctorId()">
+          <div class="step-header">
+            <span class="step-number">{{ authService.bookableProfiles().length > 1 ? '4' : '3' }}</span>
+            <h3>Fecha y Hora</h3>
+          </div>
+          
+          <div class="calendar-section" *ngIf="bookingService.availableDays().length > 0; else noSlots">
+            <p class="subtitle">Días disponibles</p>
+            <div class="day-selector">
+              <button *ngFor="let day of bookingService.availableDays()" 
+                      class="day-pill"
+                      [class.selected]="bookingService.selectedDate() === day.toISOString().split('T')[0]"
+                      (click)="selectDay(day)">
+                <span class="day-name">{{ day | date:'EEE':'':'es-PE' }}</span>
+                <span class="day-number">{{ day | date:'d' }}</span>
+              </button>
+            </div>
+            
+            <div *ngIf="bookingService.selectedDate()" class="slots-container fade-in">
+              <p class="subtitle">Horarios para el {{ bookingService.selectedDate() | date:'fullDate':'':'es-PE' }}</p>
+              <div class="slots-grid">
+                <button *ngFor="let slot of bookingService.filteredSlotsByDay()"
+                        class="slot-pill"
+                        [class.selected]="bookingService.selectedSlot()?.value === slot.value"
+                        (click)="selectSlot(slot)">
+                  {{ slot.display }}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <ng-template #noSlots>
+            <div class="empty-state">
+              <span class="emoji">📅</span>
+              <p>El doctor no tiene agenda disponible pronto.</p>
+            </div>
+          </ng-template>
+        </div>
+
+      </ng-container>
+    </section>
+
+    <aside class="summary-column">
+      <div class="confirmation-ticket fade-in">
+        <div class="ticket-header">
+          <h3>Resumen de Cita</h3>
+        </div>
+        
+        <div class="ticket-body">
+          <div class="ticket-row" [class.muted]="!bookingService.forPatientId()">
+            <span class="label">Paciente</span>
+            <span class="value">{{ getPatientName() || 'Seleccionando...' }}</span>
+          </div>
+    
+          <div class="ticket-row" [class.muted]="!selectedSpecialtyId">
+            <span class="label">Especialidad</span>
+            <span class="value">{{ getSpecialtyName() || 'Pendiente' }}</span>
+          </div>
+    
+          <div class="ticket-row" [class.muted]="!bookingService.selectedDoctorId()">
+            <span class="label">Doctor</span>
+            <span class="value">{{ selectedDoctor()?.full_name || 'Pendiente' }}</span>
+          </div>
+    
+          <div class="ticket-divider"></div>
+    
+          <div class="ticket-row highlight" [class.muted]="!bookingService.selectedSlot()">
+            <span class="label">Fecha</span>
+            <span class="value">
+              {{ (bookingService.selectedSlot()?.value | date:'dd MMM yyyy':'':'es-PE') || '--/--/--' }}
+            </span>
+          </div>
+          
+          <div class="ticket-row highlight" [class.muted]="!bookingService.selectedSlot()">
+            <span class="label">Hora</span>
+            <span class="value">
+              {{ (bookingService.selectedSlot()?.value | date:'h:mm a':'':'es-PE') || '--:--' }}
+            </span>
+          </div>
+        </div>
+    
+        <div class="ticket-footer">
+          <div *ngIf="!bookingService.selectedSlot()" class="progress-hint">
+            Completa los pasos para confirmar
+          </div>
+
+          <button *ngIf="bookingService.selectedSlot()" 
+                  class="confirm-btn fade-in" 
+                  (click)="confirmBooking()" 
+                  [disabled]="bookingService.bookingStatus() === 'loading'">
+            {{ bookingService.bookingStatus() === 'loading' ? 'Procesando...' : 'Confirmar Cita' }}
+          </button>
+        </div>
       </div>
-    </ng-container>
+    </aside>
 
-  </section>
-
-  <section class="confirmation-section" *ngIf="bookingService.selectedSlot()">
-    <h3>Confirma tu Cita</h3>
-    <div class="confirmation-details">
-      <p><strong>Doctor:</strong> {{ selectedDoctor()?.full_name }}</p>
-      <p><strong>Especialidad:</strong> {{ selectedDoctor()?.specialties?.name }}</p>
-      <p><strong>Fecha y Hora:</strong> {{ bookingService.selectedSlot()?.value | date:'full':'':'es-PE' }}</p>
-    </div>
-    <button class="confirm-btn" (click)="confirmBooking()" [disabled]="bookingService.bookingStatus() === 'loading'">
-      {{ bookingService.bookingStatus() === 'loading' ? 'Agendando...' : 'Confirmar Cita' }}
-    </button>
-  </section>
+  </div>
 </div>

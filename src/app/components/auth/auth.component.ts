@@ -1,10 +1,8 @@
-// src/app/components/auth/auth.component.ts
-import { Component, inject, signal, effect } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
 import { DataService } from '../../services/data.service';
-import { AuthMode, UserRole } from '../../interfaces/models';
 
 @Component({
   selector: 'app-auth',
@@ -14,53 +12,54 @@ import { AuthMode, UserRole } from '../../interfaces/models';
   styleUrls: ['./auth.component.scss']
 })
 export class AuthComponent {
-  fb = inject(FormBuilder);
   authService = inject(AuthService);
-  dataService = inject(DataService);
+  dataService = inject(DataService); // Necesario para las especialidades
+  private fb = inject(FormBuilder);
 
+  authMode = signal<'login' | 'register'>('login');
+  role = signal<'patient' | 'doctor'>('patient');
   loading = signal(false);
-  authMode = signal<AuthMode>('login');
-  role = signal<UserRole>('patient');
-  authForm!: FormGroup;
+  
+  authForm: FormGroup;
 
   constructor() {
-    // Re-inicializa el form cuando cambian los modos para ajustar validadores
-    effect(() => {
-      this.authMode();
-      this.role();
-      this.initForm();
-    });
-  }
-
-  initForm() {
     this.authForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
-      fullName: [null, this.authMode() === 'register' ? [Validators.required] : []],
-      role: [this.role()],
-      specialty_id: [null, this.authMode() === 'register' && this.role() === 'doctor' ? [Validators.required] : []],
-      license_number: [null, this.authMode() === 'register' && this.role() === 'doctor' ? [Validators.required] : []]
+      fullName: [''], // Se validará dinámicamente si es registro
+      specialty_id: [null],
+      license_number: ['']
     });
   }
 
   async handleAuth() {
     if (this.authForm.invalid) return;
+    
     this.loading.set(true);
+    const { email, password, fullName, specialty_id, license_number } = this.authForm.value;
+
     try {
       if (this.authMode() === 'login') {
-        const { email, password } = this.authForm.value;
-        const { error } = await this.authService.signIn({ email, password });
-        if (error) throw error;
+        await this.authService.signIn({ email, password });
       } else {
-        const { error } = await this.authService.signUp(this.authForm.value);
-        if (error) throw error;
-        alert('¡Registro exitoso! Revisa tu correo para confirmar la cuenta.');
-        this.authMode.set('login');
+        await this.authService.signUp({
+          email,
+          password,
+          full_name: fullName,
+          role: this.role(),
+          specialty_id: this.role() === 'doctor' ? specialty_id : null,
+          license_number: this.role() === 'doctor' ? license_number : null
+        });
       }
-    } catch (error: any) {
-      alert(`Error: ${error.message}`);
+    } catch (error) {
+      console.error(error);
     } finally {
       this.loading.set(false);
     }
+  }
+
+  toggleMode(mode: 'login' | 'register') {
+    this.authMode.set(mode);
+    this.authForm.reset();
   }
 }

@@ -1,32 +1,74 @@
 <div class="page-container">
   <header class="page-header">
-    <h1>Mi Grupo Familiar</h1>
-    <p>Administra los perfiles de tus dependientes para agendar citas en su nombre.</p>
+    <div class="header-content">
+      <h1>Mi Grupo Familiar</h1>
+      <p>Gestiona los perfiles de tus dependientes para agendar citas rápidamente.</p>
+    </div>
   </header>
 
   <div class="family-layout">
-    <section class="family-list-section">
-      <h3>Miembros Registrados</h3>
-      <div class="members-list">
-        <div class="member-card primary" *ngIf="authService.userProfile() as profile">
-          <p>{{ profile.full_name }}</p>
-          <span>(Tú)</span>
+    
+    <section class="cards-section">
+      <div class="cards-grid">
+        
+        <div class="contact-card main-profile fade-in" *ngIf="authService.userProfile() as profile">
+          <div class="card-badge">Titular</div>
+          <div class="avatar-wrapper">
+            <div class="avatar" [style.background-color]="getAvatarColor(profile.full_name)">
+              {{ getInitials(profile.full_name) }}
+            </div>
+          </div>
+          <div class="card-info">
+            <h3>{{ profile.full_name }}</h3>
+            <p>Cuenta Principal</p>
+          </div>
         </div>
-        <div *ngFor="let dependent of authService.dependents()" class="member-card">
-          <p>{{ dependent.full_name }}</p>
+
+        <div *ngFor="let dependent of authService.dependents()" class="contact-card fade-in">
+          <div class="avatar-wrapper">
+            <div class="avatar" [style.background-color]="getAvatarColor(dependent.full_name)">
+              {{ getInitials(dependent.full_name) }}
+            </div>
+          </div>
+          <div class="card-info">
+            <h3>{{ dependent.full_name }}</h3>
+            <p>Familiar / Dependiente</p>
+          </div>
         </div>
-        <p *ngIf="authService.dependents().length === 0" class="empty-list">
-          Aún no has añadido ningún familiar.
-        </p>
+
+        <div *ngIf="authService.dependents().length === 0" class="empty-card fade-in">
+          <div class="dashed-border">
+            <span>+</span>
+            <p>Añade a tu primer familiar</p>
+          </div>
+        </div>
+
       </div>
     </section>
 
-    <section class="add-family-section">
-      <h3>Añadir Nuevo Familiar</h3>
-      <form (ngSubmit)="addDependent()" class="add-form">
-        <input type="text" [(ngModel)]="newDependentName" name="newDependentName" placeholder="Nombre completo del familiar..." required>
-        <button type="submit" [disabled]="!newDependentName.trim()">Añadir</button>
-      </form>
-    </section>
+    <aside class="sidebar-section">
+      <div class="add-family-card fade-in">
+        <div class="card-header">
+          <div class="icon-bg">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+          </div>
+          <h3>Registrar Familiar</h3>
+        </div>
+        
+        <p class="helper-text">Agrega hijos, padres o cónyuges para gestionar sus citas médicas desde tu cuenta.</p>
+
+        <form (ngSubmit)="addDependent()" class="add-form">
+          <div class="input-group">
+            <label>Nombre Completo</label>
+            <input type="text" [(ngModel)]="newDependentName" name="newDependentName" placeholder="Ej: Maria Gonzales" required autocomplete="off">
+          </div>
+          
+          <button type="submit" [disabled]="!newDependentName.trim()" class="add-btn">
+            Añadir Miembro
+          </button>
+        </form>
+      </div>
+    </aside>
+
   </div>
 </div>

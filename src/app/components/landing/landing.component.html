@@ -1,97 +1,196 @@
-<section class="hero-section">
-  <div class="content-container">
-    <div class="hero-text">
-      <h1>Tu salud, nuestra prioridad. Agenda tu cita en línea.</h1>
-      <p>Accede a los mejores especialistas de la región de forma rápida y segura. Gestiona tu historial médico y recetas desde la comodidad de tu hogar.</p>
-      <button class="cta-btn" (click)="goToAuth()">Agendar Cita Ahora</button>
-    </div>
-    <div class="hero-image">
-      <img src="https://cdn.pixabay.com/photo/2021/01/11/01/59/blood-test-5906818_1280.jpg" alt="Atención médica profesional">
-    </div>
-  </div>
-</section>
+<div class="landing-wrapper animate-fade-in">
 
-<section class="features-section">
-  <div class="content-container">
-    <h2 class="section-title">Confianza y Profesionalismo a tu Servicio</h2>
-    <div class="features-grid">
-      <div class="feature-card">
-        <div class="icon-wrapper"></div>
-        <h3>Tecnología Avanzada</h3>
-        <p>Equipos de última generación para diagnósticos precisos.</p>
+  <section class="hero-section">
+    <div class="bg-shape-1"></div>
+    <div class="bg-shape-2"></div>
+    
+    <div class="content-container">
+      <div class="hero-text animate-slide-up">
+        <span class="badge-pill">🏥 Tu bienestar comienza aquí</span>
+        <h1>Tu salud, nuestra prioridad. <span class="highlight">Agenda en línea.</span></h1>
+        <p>Accede a los mejores especialistas de la región de forma rápida y segura. Gestiona tu historial médico y recetas desde cualquier dispositivo.</p>
+        <div class="hero-buttons">
+          <button class="cta-btn primary" (click)="goToAuth()">Agendar Cita Ahora</button>
+          <button class="cta-btn secondary" (click)="scrollTo('specialties')">Ver Especialidades</button>
+        </div>
       </div>
-      <div class="feature-card">
-        <div class="icon-wrapper"></div>
-        <h3>Médicos Expertos</h3>
-        <p>Especialistas calificados y comprometidos con tu salud.</p>
-      </div>
-      <div class="feature-card">
-        <div class="icon-wrapper"></div>
-        <h3>Atención Personalizada</h3>
-        <p>Un trato cálido y humano centrado en tus necesidades.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="specialties-section">
-  <div class="content-container">
-    <h2 class="section-title">Nuestras Especialidades</h2>
-    <p class="section-subtitle">Ofrecemos una amplia gama de especialidades para cuidar de ti y tu familia.</p>
-    <div class="specialties-grid">
-      <div class="specialty-card">
-        <img src="https://images.pexels.com/photos/5207102/pexels-photo-5207102.jpeg" alt="Cardiología">
-        <div class="card-content"><h3>Cardiología</h3></div>
-      </div>
-      <div class="specialty-card">
-        <img src="https://images.pexels.com/photos/5927811/pexels-photo-5927811.jpeg" alt="Dermatología">
-        <div class="card-content"><h3>Dermatología</h3></div>
-      </div>
-      <div class="specialty-card">
-        <img src="https://images.pexels.com/photos/7446997/pexels-photo-7446997.jpeg" alt="Pediatría">
-        <div class="card-content"><h3>Pediatría</h3></div>
-      </div>
-      <div class="specialty-card">
-        <img src="https://images.pexels.com/photos/7089015/pexels-photo-7089015.jpeg" alt="Ginecología">
-        <div class="card-content"><h3>Ginecología</h3></div>
-      </div>
-      <div class="specialty-card">
-        <img src="https://images.pexels.com/photos/5752289/pexels-photo-5752289.jpeg" alt="Oftalmología">
-        <div class="card-content"><h3>Oftalmología</h3></div>
-      </div>
-      <div class="specialty-card">
-        <img src="https://images.pexels.com/photos/5215000/pexels-photo-5215000.jpeg" alt="Medicina General">
-        <div class="card-content"><h3>Medicina General</h3></div>
+      <div class="hero-image animate-float">
+        <div class="image-wrapper">
+          <img src="https://images.pexels.com/photos/4021775/pexels-photo-4021775.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="Doctora atendiendo paciente">
+          <div class="floating-card">
+            <span class="icon">⭐</span>
+            <div>
+              <strong>+5000</strong>
+              <span>Pacientes Felices</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<section class="testimonials-section">
-  <div class="content-container">
-    <h2 class="section-title">Lo que dicen nuestros pacientes</h2>
-    <div class="testimonials-grid">
-      <div class="testimonial-card">
-        <img src="https://i.pravatar.cc/100?u=ana" alt="Avatar Ana García">
-        <p class="quote">"El trato fue excepcional y el doctor se tomó todo el tiempo necesario para explicarme mi diagnóstico."</p>
-        <p class="author">- Ana García</p>
-      </div>
-      <div class="testimonial-card">
-        <img src="https://i.pravatar.cc/100?u=carlos" alt="Avatar Carlos Martinez">
-        <p class="quote">"Poder agendar la cita por internet me ahorró muchísimo tiempo. El sistema es muy fácil de usar."</p>
-        <p class="author">- Carlos Martinez</p>
-      </div>
-      <div class="testimonial-card">
-        <img src="https://i.pravatar.cc/100?u=sofia" alt="Avatar Sofía López">
-        <p class="quote">"Llevé a mi hijo a pediatría y la doctora fue increíble con él. Un ambiente muy amigable para los niños."</p>
-        <p class="author">- Sofía López</p>
+  <section class="features-section">
+    <div class="content-container">
+      <h2 class="section-title">Confianza y Profesionalismo</h2>
+      <p class="section-subtitle">Tres pilares que definen nuestra atención médica.</p>
+      
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="icon-wrapper">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18h8"/><path d="M3 22h18"/><path d="M14 22a7 7 0 1 0 0-14h-1"/><path d="M9 14h2"/><path d="M9 12a2 2 0 0 1-2-2V6h6v4a2 2 0 0 1-2 2Z"/><path d="M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3"/></svg>
+          </div>
+          <h3>Tecnología Avanzada</h3>
+          <p>Equipos de última generación para diagnósticos precisos y rápidos.</p>
+        </div>
+        
+        <div class="feature-card">
+          <div class="icon-wrapper">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"/><path d="M8 15v6"/><path d="M11 22a2 2 0 1 0 4 0"/></svg>
+          </div>
+          <h3>Médicos Expertos</h3>
+          <p>Un staff de especialistas certificados y comprometidos con tu salud.</p>
+        </div>
+        
+        <div class="feature-card">
+          <div class="icon-wrapper">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+          </div>
+          <h3>Trato Humano</h3>
+          <p>Atención cálida, personalizada y centrada en tus necesidades.</p>
+        </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<footer class="main-footer">
-  <div class="content-container">
-    <p>&copy; 2025 Clínica Monteluz. Todos los derechos reservados.</p>
-  </div>
-</footer>
+  <section class="specialties-section" id="specialties">
+    <div class="content-container">
+      <h2 class="section-title">Nuestras Especialidades</h2>
+      <p class="section-subtitle">Cuidamos de ti y tu familia en cada etapa de la vida.</p>
+      
+      <div class="specialties-grid">
+        <div class="specialty-card">
+          <img src="https://images.pexels.com/photos/5207102/pexels-photo-5207102.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Cardiología">
+          <div class="card-overlay">
+            <h3>Cardiología</h3>
+            <span class="arrow">→</span>
+          </div>
+        </div>
+        <div class="specialty-card">
+          <img src="https://images.pexels.com/photos/5927811/pexels-photo-5927811.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Dermatología">
+          <div class="card-overlay">
+            <h3>Dermatología</h3>
+            <span class="arrow">→</span>
+          </div>
+        </div>
+        <div class="specialty-card">
+          <img src="https://images.pexels.com/photos/7446997/pexels-photo-7446997.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Pediatría">
+          <div class="card-overlay">
+            <h3>Pediatría</h3>
+            <span class="arrow">→</span>
+          </div>
+        </div>
+        <div class="specialty-card">
+          <img src="https://images.pexels.com/photos/7089015/pexels-photo-7089015.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Ginecología">
+          <div class="card-overlay">
+            <h3>Ginecología</h3>
+            <span class="arrow">→</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="view-more-container">
+        <button class="text-btn">Ver todas las especialidades</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="testimonials-section">
+    <div class="content-container">
+      <h2 class="section-title">Pacientes Satisfechos</h2>
+      <div class="testimonials-grid">
+        <div class="testimonial-card">
+          <div class="stars">★★★★★</div>
+          <p class="quote">"El trato fue excepcional y el doctor se tomó todo el tiempo necesario para explicarme mi diagnóstico con paciencia."</p>
+          <div class="author-info">
+            <img src="https://i.pravatar.cc/100?u=ana" alt="Ana">
+            <div>
+              <p class="author">Ana García</p>
+              <span class="patient-type">Paciente Verificada</span>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-card">
+          <div class="stars">★★★★★</div>
+          <p class="quote">"Poder agendar la cita por internet me ahorró muchísimo tiempo. El sistema es muy intuitivo y rápido."</p>
+          <div class="author-info">
+            <img src="https://i.pravatar.cc/100?u=carlos" alt="Carlos">
+            <div>
+              <p class="author">Carlos M.</p>
+              <span class="patient-type">Paciente Verificado</span>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-card">
+          <div class="stars">★★★★★</div>
+          <p class="quote">"Las instalaciones son impecables y modernas. Me sentí muy segura durante toda mi visita a la clínica."</p>
+          <div class="author-info">
+            <img src="https://i.pravatar.cc/100?u=sofia" alt="Sofia">
+            <div>
+              <p class="author">Sofía López</p>
+              <span class="patient-type">Paciente Verificada</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="pre-footer">
+    <div class="content-container">
+      <h2>¿Listo para priorizar tu salud?</h2>
+      <p>No esperes más. Nuestros especialistas están listos para atenderte.</p>
+      <button class="cta-btn white" (click)="goToAuth()">Reservar Cita</button>
+    </div>
+  </section>
+
+  <footer class="main-footer">
+    <div class="content-container footer-grid">
+      <div class="footer-col brand-col">
+        <h3>Clínica Monteluz</h3>
+        <p>Comprometidos con la excelencia médica y el cuidado humano de nuestros pacientes.</p>
+      </div>
+      
+      <div class="footer-col">
+        <h4>Enlaces Rápidos</h4>
+        <ul>
+          <li><a href="#">Nosotros</a></li>
+          <li><a href="#">Especialidades</a></li>
+          <li><a href="#">Staff Médico</a></li>
+          <li><a href="#">Blog de Salud</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-col">
+        <h4>Contacto</h4>
+        <ul>
+          <li>📍 Av. Principal 123, Lima</li>
+          <li>📞 (01) 555-0101</li>
+          <li>✉️ contacto$#64monteluz.pe</li>
+        </ul>
+      </div>
+      
+      <div class="footer-col">
+        <h4>Horario</h4>
+        <ul>
+          <li>Lun - Vie: 7:00 AM - 9:00 PM</li>
+          <li>Sábados: 8:00 AM - 6:00 PM</li>
+          <li>Domingos: Urgencias</li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2025 Clínica Monteluz. Todos los derechos reservados.</p>
+    </div>
+  </footer>
+
+</div>
